@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+})
+
 interface User {
   id: number
   email: string
@@ -26,10 +31,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(email: string, password: string) {
       try {
-        const response = await axios.post('/api/auth/login', {
-          email,
-          password,
-        })
+        const response = await api.post('/api/auth/login', { email, password })
 
         const { token, user } = response.data
         this.token = token
@@ -37,10 +39,21 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('token', token)
 
         // Configure axios defaults
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`
-      } catch (error) {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      } catch (error: unknown) {
         console.error('Login failed:', error)
-        throw error
+
+        // Check if error is an AxiosError
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 401) {
+            throw new Error('Invalid email or password')
+          } else if (error.response?.data) {
+            // Ensure the error message is a string
+            throw new Error(String(error.response.data))
+          }
+        }
+        // Fallback for non-Axios errors or if no specific error message is provided
+        throw new Error('An error occurred during login. Please try again.')
       }
     },
 
@@ -48,7 +61,7 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       this.user = null
       localStorage.removeItem('token')
-      delete axios.defaults.headers.common['Authorization']
+      delete api.defaults.headers.common['Authorization']
     },
   },
 })
