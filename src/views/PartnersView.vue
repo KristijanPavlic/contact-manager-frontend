@@ -1,10 +1,94 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Partners</h1>
-    <!-- Add partners list and management functionality here -->
+  <div class="space-y-6">
+    <div class="sm:flex sm:items-center">
+      <div class="sm:flex-auto">
+        <h1 class="text-3xl font-bold text-gray-900">Partners</h1>
+        <p class="mt-2 text-sm text-gray-700">
+          A list of all the partners in your account including their name, title, email and role.
+        </p>
+      </div>
+      <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <button
+          type="button"
+          class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
+        >
+          Add partner
+        </button>
+      </div>
+    </div>
+    <Card>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead>
+            <tr>
+              <th
+                scope="col"
+                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+              >
+                Name
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Address
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                VAT Number
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Type
+              </th>
+              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                <span class="sr-only">Edit</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="partner in partners" :key="partner.id">
+              <td
+                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+              >
+                {{ partner.name }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.address }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.vatNumber }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ partner.type }}</td>
+              <td
+                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
+              >
+                <a href="#" class="text-green-600 hover:text-green-900"
+                  >Edit<span class="sr-only">, {{ partner.name }}</span></a
+                >
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-// Add any necessary imports and logic
+import { ref } from 'vue'
+import Card from '@/components/CardComponent.vue'
+
+const partners = ref([
+  {
+    id: 1,
+    name: 'Acme Inc',
+    address: '123 Main St, New York, NY 10001',
+    vatNumber: '123456789',
+    type: 'Customer',
+  },
+  {
+    id: 2,
+    name: 'Globex Corporation',
+    address: '456 Elm St, Springfield, IL 62701',
+    vatNumber: '987654321',
+    type: 'Supplier',
+  },
+  // Add more partners as needed
+])
 </script>
