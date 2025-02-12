@@ -12,10 +12,25 @@
               </div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">
-                  {{ employee.name }}
+                  {{ employee.firstName }} {{ employee.lastName }}
                 </p>
                 <p class="text-sm text-gray-500 truncate">
                   {{ employee.position }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ employee.email }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ employee.phone }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ employee.mobile }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ employee.active }}
+                </p>
+                <p class="text-sm text-gray-500 truncate">
+                  {{ employee.note }}
                 </p>
               </div>
               <div>
@@ -69,15 +84,28 @@ import Card from '@/components/CardComponent.vue'
 const employees = ref([
   {
     id: 1,
-    name: 'Jane Cooper',
-    position: 'CEO',
+    firstName: 'Pero',
+    lastName: 'Perić',
+    email: 'pero.peric@mail.com',
+    phone: '+385 1 123 4567',
+    mobile: '+385 91 000 0000',
+    position: 'Voditelj kvalitete',
+    active: true,
+    note: 'Jako ljubazan',
     imageUrl:
       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },
   {
     id: 2,
-    name: 'John Doe',
-    position: 'CTO',
+    firstName: 'Ivan',
+    lastName: 'Horavt',
+    email: 'ivan.horvat@mail.com',
+    phone: '+385 1 564 0094',
+    mobile: '+385 95 123 4567',
+    position: 'Voditelj nabave',
+    active: false,
+    note: 'Nepouzdan',
+    partners: 'Ljekarne Zagreb, Ljekarne Vaše zdravlje',
     imageUrl:
       'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },

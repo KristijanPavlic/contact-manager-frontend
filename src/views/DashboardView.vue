@@ -58,25 +58,21 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { UsersIcon, OfficeBuildingIcon, UserGroupIcon, ChartBarIcon } from '@heroicons/vue/outline'
+import { UsersIcon, OfficeBuildingIcon } from '@heroicons/vue/outline'
 import PartnersChart from '@/components/PartnersChart.vue'
 import ContactsChart from '@/components/ContactsChart.vue'
 
 const stats = ref([
-  { name: 'Total Partners', stat: '0', icon: OfficeBuildingIcon, href: '/partners' },
   { name: 'Total Contacts', stat: '0', icon: UsersIcon, href: '/contacts' },
-  { name: 'Active Partners', stat: '0', icon: UserGroupIcon, href: '/partners?status=active' },
-  { name: 'Active Contacts', stat: '0', icon: ChartBarIcon, href: '/contacts?status=active' },
+  { name: 'Total Partners', stat: '0', icon: OfficeBuildingIcon, href: '/partners' },
 ])
 
 onMounted(async () => {
   // Fetch dashboard data from API
   // This is a placeholder. Replace with actual API call.
   stats.value = [
-    { name: 'Total Partners', stat: '120', icon: OfficeBuildingIcon, href: '/partners' },
     { name: 'Total Contacts', stat: '1,234', icon: UsersIcon, href: '/contacts' },
-    { name: 'Active Partners', stat: '98', icon: UserGroupIcon, href: '/partners?status=active' },
-    { name: 'Active Contacts', stat: '1,023', icon: ChartBarIcon, href: '/contacts?status=active' },
+    { name: 'Total Partners', stat: '120', icon: OfficeBuildingIcon, href: '/partners' },
   ]
 })
 </script>

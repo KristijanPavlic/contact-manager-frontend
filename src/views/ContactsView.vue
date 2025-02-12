@@ -25,7 +25,10 @@
                 scope="col"
                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
               >
-                Name
+                First Name
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Last Name
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Email
@@ -34,7 +37,19 @@
                 Phone
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Mobile
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Position
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Active
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Note
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Partners
               </th>
               <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                 <span class="sr-only">Edit</span>
@@ -46,12 +61,29 @@
               <td
                 class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
               >
-                {{ contact.name }}
+                {{ contact.firstName }}
+              </td>
+              <td
+                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+              >
+                {{ contact.lastName }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ contact.email }}</td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ contact.phone }}</td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ contact.mobile }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ contact.position }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ contact.active }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ contact.note }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ contact.partners }}
               </td>
               <td
                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
@@ -75,17 +107,27 @@ import Card from '@/components/CardComponent.vue'
 const contacts = ref([
   {
     id: 1,
-    name: 'Jane Cooper',
-    email: 'jane.cooper@example.com',
-    phone: '+1 (555) 123-4567',
-    position: 'CEO',
+    firstName: 'Pero',
+    lastName: 'Perić',
+    email: 'pero.peric@mail.com',
+    phone: '+385 1 123 4567',
+    mobile: '+385 91 000 0000',
+    position: 'Voditelj kvalitete',
+    active: true,
+    note: 'Jako ljubazan',
+    partners: 'Feroimpex, Oktal Pharma',
   },
   {
     id: 2,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+1 (555) 987-6543',
-    position: 'CTO',
+    firstName: 'Ivan',
+    lastName: 'Horavt',
+    email: 'ivan.horvat@mail.com',
+    phone: '+385 1 564 0094',
+    mobile: '+385 95 123 4567',
+    position: 'Voditelj nabave',
+    active: false,
+    note: 'Nepouzdan',
+    partners: 'Ljekarne Zagreb, Ljekarne Vaše zdravlje',
   },
   // Add more contacts as needed
 ])

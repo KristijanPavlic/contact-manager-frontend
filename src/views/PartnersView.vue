@@ -28,7 +28,16 @@
                 Name
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Address
+                Street
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Postal Code
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                City
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Country
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 VAT Number
@@ -49,7 +58,16 @@
                 {{ partner.name }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.address }}
+                {{ partner.street }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.postalCode }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.city }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.country }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.vatNumber }}
@@ -77,16 +95,22 @@ import Card from '@/components/CardComponent.vue'
 const partners = ref([
   {
     id: 1,
-    name: 'Acme Inc',
-    address: '123 Main St, New York, NY 10001',
-    vatNumber: '123456789',
+    name: 'Ljekarne Vaše zdravlje',
+    street: 'Ilica 1',
+    postalCode: '10000',
+    city: 'Zagreb',
+    country: 'Croatia',
+    vatNumber: '123456789123',
     type: 'Customer',
   },
   {
     id: 2,
-    name: 'Globex Corporation',
-    address: '456 Elm St, Springfield, IL 62701',
-    vatNumber: '987654321',
+    name: 'Oktal Pharma',
+    street: 'Strma ulica 45',
+    postalCode: '10000',
+    city: 'Zagreb',
+    country: 'Croatia',
+    vatNumber: '321987654321',
     type: 'Supplier',
   },
   // Add more partners as needed

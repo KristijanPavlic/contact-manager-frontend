@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-6 grid-cols-2 lg:grid-cols-4">
       <Card v-for="stat in stats" :key="stat.name">
         <dt class="text-sm font-medium text-gray-500 truncate">
           {{ stat.name }}
