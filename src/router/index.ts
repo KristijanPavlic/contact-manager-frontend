@@ -33,6 +33,18 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/settings/employees',
+      name: 'employee',
+      component: () => import('../views/EmployeesView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/settings/tags',
+      name: 'tags',
+      component: () => import('../views/TagsView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

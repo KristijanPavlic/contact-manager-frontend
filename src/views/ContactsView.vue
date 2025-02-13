@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Contacts</h1>
+        <h2 class="text-3xl font-bold text-gray-900">Contacts</h2>
         <p class="mt-2 text-sm text-gray-700">
           A list of all the contacts in your account including their name, title, email and role.
         </p>
@@ -89,7 +89,7 @@
                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
               >
                 <a href="#" class="text-green-600 hover:text-green-900"
-                  >Edit<span class="sr-only">, {{ contact.name }}</span></a
+                  >Edit<span class="sr-only">, {{ contact.firstName }}</span></a
                 >
               </td>
             </tr>

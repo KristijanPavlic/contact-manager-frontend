@@ -8,14 +8,59 @@
               <img class="h-8 w-auto" src="/logo.svg" alt="Logo" />
               <span
                 class="ml-8 text-xl font-semibold hover:text-green-700 transition-all duration-300 ease-in-out"
-                >Contact Manager</span
               >
+                Contact Manager
+              </span>
             </router-link>
-            <div class="hidden lg:-my-px lg:ml-6 lg:flex lg:space-x-8">
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:-my-px lg:ml-6 lg:flex lg:items-center lg:space-x-8">
               <NavLink to="/" :exact="true">Dashboard</NavLink>
               <NavLink to="/partners">Partners</NavLink>
               <NavLink to="/contacts">Contacts</NavLink>
-              <NavLink to="/settings">Settings</NavLink>
+              <!-- Settings dropdown for desktop (clickable) -->
+              <div ref="desktopDropdownRef" class="relative inline-block">
+                <button
+                  type="button"
+                  @click.stop="toggleDesktopDropdown"
+                  :class="[
+                    'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold outline-none transition-all duration-300 ease-in-out focus:outline-none',
+                    desktopDropdownOpen
+                      ? 'border-green-500 text-black'
+                      : 'border-transparent text-gray-600 hover:text-black hover:border-gray-400',
+                  ]"
+                >
+                  Settings
+                  <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                      fill-rule="evenodd"
+                      d="M5.23 7.21a.75.75 0 011.06.02L10 10.88l3.71-3.65a.75.75 0 111.04 1.08l-4.25 4.19a.75.75 0 01-1.06 0L5.21 8.31a.75.75 0 01.02-1.06z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                <transition name="fade">
+                  <div
+                    v-if="desktopDropdownOpen"
+                    class="absolute left-0 mt-2 w-40 rounded-md bg-white shadow-lg z-10"
+                  >
+                    <router-link
+                      to="/settings/employees"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      @click="desktopDropdownOpen = false"
+                    >
+                      Employees
+                    </router-link>
+                    <router-link
+                      to="/settings/tags"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      @click="desktopDropdownOpen = false"
+                    >
+                      Tags
+                    </router-link>
+                  </div>
+                </transition>
+              </div>
             </div>
           </div>
           <div class="hidden lg:ml-6 lg:flex lg:items-center">
@@ -52,25 +97,58 @@
         </div>
       </div>
 
-      <!-- Mobile menu, show/hide based on menu state. -->
+      <!-- Mobile menu -->
       <div class="lg:hidden px-4" :class="{ block: isMobileMenuOpen, hidden: !isMobileMenuOpen }">
-        <div
-          class="pt-2 pb-3 space-y-2 grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-x-4 gap-y-2"
-        >
-          <router-link
-            v-for="link in navLinks"
-            :key="link.to"
-            :to="link.to"
-            class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-300 ease-in-out"
-            :class="[
-              $route.path === link.to
-                ? 'border-green-500 text-green-700 bg-green-50 rounded-md'
-                : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 rounded-md',
-            ]"
-            @click="closeMobileMenu"
-          >
-            {{ link.text }}
-          </router-link>
+        <div class="pt-2 pb-3 space-y-2">
+          <div v-for="link in navLinks" :key="link.text">
+            <!-- Standard mobile nav link -->
+            <div v-if="!link.children">
+              <router-link
+                :to="link.to"
+                class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-300 ease-in-out"
+                :class="[
+                  $route.path === link.to
+                    ? 'border-green-500 text-green-700 bg-green-50 rounded-md'
+                    : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 rounded-md',
+                ]"
+                @click="closeMobileMenu"
+              >
+                {{ link.text }}
+              </router-link>
+            </div>
+            <!-- Mobile dropdown for links with children (e.g., Settings) -->
+            <div v-else>
+              <button
+                @click="toggleDropdown(link.text)"
+                class="w-full text-left pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-300 ease-in-out border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 rounded-md flex justify-between items-center"
+              >
+                {{ link.text }}
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 10.88l3.71-3.65a.75.75 0 111.04 1.08l-4.25 4.19a.75.75 0 01-1.06 0L5.21 8.31a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <div v-if="openDropdown === link.text" class="ml-4 space-y-1">
+                <router-link
+                  v-for="child in link.children"
+                  :key="child.text"
+                  :to="child.to"
+                  class="block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-all duration-300 ease-in-out"
+                  :class="[
+                    $route.path === child.to
+                      ? 'border-green-500 text-green-700 bg-green-50 rounded-md'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800 rounded-md',
+                  ]"
+                  @click="closeMobileMenu"
+                >
+                  {{ child.text }}
+                </router-link>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="pt-4 pb-3 border-t border-gray-200">
           <div class="space-y-1">
@@ -94,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
 import NavLink from '../components/NavLink.vue'
@@ -103,12 +181,22 @@ const authStore = useAuthStore()
 const router = useRouter()
 
 const isMobileMenuOpen = ref(false)
+const openDropdown = ref<string | null>(null)
+const desktopDropdownOpen = ref(false)
+const desktopDropdownRef = ref<HTMLElement | null>(null)
 
 const navLinks = [
   { to: '/', text: 'Dashboard' },
   { to: '/partners', text: 'Partners' },
   { to: '/contacts', text: 'Contacts' },
-  { to: '/settings', text: 'Settings' },
+  {
+    text: 'Settings',
+    to: '/settings', // fallback route if needed
+    children: [
+      { to: '/settings/employees', text: 'Employees' },
+      { to: '/settings/tags', text: 'Tags' },
+    ],
+  },
 ]
 
 const toggleMobileMenu = () => {
@@ -117,7 +205,33 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
+  openDropdown.value = null
 }
+
+const toggleDropdown = (name: string) => {
+  openDropdown.value = openDropdown.value === name ? null : name
+}
+
+const toggleDesktopDropdown = () => {
+  desktopDropdownOpen.value = !desktopDropdownOpen.value
+}
+
+const closeDesktopDropdown = (event: Event) => {
+  if (
+    desktopDropdownOpen.value &&
+    desktopDropdownRef.value &&
+    !desktopDropdownRef.value.contains(event.target as Node)
+  ) {
+    desktopDropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeDesktopDropdown)
+})
+onUnmounted(() => {
+  document.removeEventListener('click', closeDesktopDropdown)
+})
 
 const logout = () => {
   authStore.logout()
@@ -129,3 +243,14 @@ const handleMobileLogout = () => {
   logout()
 }
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

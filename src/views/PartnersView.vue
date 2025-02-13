@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Partners</h1>
+        <h2 class="text-3xl font-bold text-gray-900">Partners</h2>
         <p class="mt-2 text-sm text-gray-700">
           A list of all the partners in your account including their name, title, email and role.
         </p>

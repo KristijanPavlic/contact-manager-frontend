@@ -12,7 +12,7 @@
         <div class="p-5">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <component :is="item.icon" class="h-6 w-6 text-gray-400" aria-hidden="true" />
+              <component :is="item" class="h-6 w-6 text-gray-400" aria-hidden="true" />
             </div>
             <div class="ml-5 w-0 flex-1">
               <dl>
@@ -58,21 +58,20 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { UsersIcon, OfficeBuildingIcon } from '@heroicons/vue/outline'
 import PartnersChart from '@/components/PartnersChart.vue'
 import ContactsChart from '@/components/ContactsChart.vue'
 
 const stats = ref([
-  { name: 'Total Contacts', stat: '0', icon: UsersIcon, href: '/contacts' },
-  { name: 'Total Partners', stat: '0', icon: OfficeBuildingIcon, href: '/partners' },
+  { name: 'Total Contacts', stat: '0', href: '/contacts' },
+  { name: 'Total Partners', stat: '0', href: '/partners' },
 ])
 
 onMounted(async () => {
   // Fetch dashboard data from API
   // This is a placeholder. Replace with actual API call.
   stats.value = [
-    { name: 'Total Contacts', stat: '1,234', icon: UsersIcon, href: '/contacts' },
-    { name: 'Total Partners', stat: '120', icon: OfficeBuildingIcon, href: '/partners' },
+    { name: 'Total Contacts', stat: '1,234', href: '/contacts' },
+    { name: 'Total Partners', stat: '120', href: '/partners' },
   ]
 })
 </script>

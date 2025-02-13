@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+    <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
     <div class="grid gap-6 grid-cols-2 lg:grid-cols-4">
       <Card v-for="stat in stats" :key="stat.name">
         <dt class="text-sm font-medium text-gray-500 truncate">
@@ -58,10 +58,10 @@ import { ref } from 'vue'
 import Card from '@/components/CardComponent.vue'
 
 const stats = ref([
-  { name: 'Total Partners', value: '120' },
   { name: 'Total Contacts', value: '1,234' },
-  { name: 'Active Partners', value: '98' },
+  { name: 'Total Partners', value: '120' },
   { name: 'Active Contacts', value: '1,023' },
+  { name: 'Active Partners', value: '98' },
 ])
 
 const recentContacts = ref([
