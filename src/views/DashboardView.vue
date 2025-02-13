@@ -58,8 +58,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import PartnersChart from '@/components/PartnersChart.vue'
-import ContactsChart from '@/components/ContactsChart.vue'
 
 const stats = ref([
   { name: 'Total Contacts', stat: '0', href: '/contacts' },
