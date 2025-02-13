@@ -64,12 +64,6 @@
                   {{ employee.napomena }}
                 </span>
               </div>
-              <div class="flex items-center text-gray-600 col-span-2" v-if="employee.partneri">
-                <UsersIcon class="h-5 w-5 mr-2" />
-                <span class="text-sm min-w-0 break-words" :title="employee.partneri">
-                  {{ employee.partneri }}
-                </span>
-              </div>
             </div>
           </li>
         </ul>
@@ -87,7 +81,6 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   AnnotationIcon,
-  UsersIcon,
   DeviceMobileIcon,
   PhoneIcon,
 } from '@heroicons/vue/outline'
@@ -102,7 +95,6 @@ interface Employee {
   pozicija: string
   aktivan: boolean
   napomena?: string
-  partneri?: string
 }
 
 const employees = ref<Employee[]>([
@@ -127,7 +119,6 @@ const employees = ref<Employee[]>([
     pozicija: 'Voditelj nabave',
     aktivan: false,
     napomena: 'Nepouzdan',
-    partneri: 'Ljekarne Zagreb, Ljekarne Vaše zdravlje',
   },
   {
     id: 3,
@@ -150,7 +141,6 @@ const employees = ref<Employee[]>([
     pozicija: 'Voditelj nabave',
     aktivan: false,
     napomena: 'Nepouzdan',
-    partneri: 'Ljekarne Zagreb, Ljekarne Vaše zdravlje',
   },
   // Add more employees as needed
 ])
