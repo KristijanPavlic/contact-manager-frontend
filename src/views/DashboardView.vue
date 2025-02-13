@@ -33,24 +33,10 @@
             <a
               :href="item.href"
               class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
-              >View all</a
+              >Vidi sve</a
             >
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Charts -->
-    <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Partners Growth</h2>
-        <PartnersChart />
-      </div>
-      <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-          Contacts Distribution
-        </h2>
-        <ContactsChart />
       </div>
     </div>
   </div>
@@ -60,16 +46,16 @@
 import { ref, onMounted } from 'vue'
 
 const stats = ref([
-  { name: 'Total Contacts', stat: '0', href: '/contacts' },
-  { name: 'Total Partners', stat: '0', href: '/partners' },
+  { name: 'Svi kontakti', stat: '0', href: '/kontakti' },
+  { name: 'Svi Partneri', stat: '0', href: '/partneri' },
 ])
 
 onMounted(async () => {
   // Fetch dashboard data from API
   // This is a placeholder. Replace with actual API call.
   stats.value = [
-    { name: 'Total Contacts', stat: '1,234', href: '/contacts' },
-    { name: 'Total Partners', stat: '120', href: '/partners' },
+    { name: 'Svi kontakti', stat: '1,234', href: '/kontakti' },
+    { name: 'Svi Partneri', stat: '120', href: '/partneri' },
   ]
 })
 </script>

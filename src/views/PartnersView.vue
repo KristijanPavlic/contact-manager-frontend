@@ -2,17 +2,17 @@
   <div class="space-y-6">
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
-        <h2 class="text-3xl font-bold text-gray-900">Partners</h2>
+        <h2 class="text-3xl font-bold text-gray-900">Partneri</h2>
         <p class="mt-2 text-sm text-gray-700">
-          A list of all the partners in your account including their name, title, email and role.
+          Pregled svih partnera. Dodajte nove partnere ili uredite postojeće.
         </p>
       </div>
       <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
         <button
-          type="button"
+          kupac="button"
           class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
         >
-          Add partner
+          Dodaj partnera
         </button>
       </div>
     </div>
@@ -25,28 +25,34 @@
                 scope="col"
                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
               >
-                Name
+                Naziv partnera
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Street
+                Adresa
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Postal Code
+                Poštanski broj
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                City
+                Grad
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Country
+                Država
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                VAT Number
+                VAT broj
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Type
+                Kupac
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Dobavljač
+              </th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                Napomena
               </th>
               <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                <span class="sr-only">Edit</span>
+                <span class="sr-only">Uredi</span>
               </th>
             </tr>
           </thead>
@@ -55,29 +61,37 @@
               <td
                 class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
               >
-                {{ partner.name }}
+                {{ partner.nazivPartnera }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.street }}
+                {{ partner.adresa }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.postalCode }}
+                {{ partner.postankiBroj }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.city }}
+                {{ partner.grad }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.country }}
+                {{ partner.drzava }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.vatNumber }}
+                {{ partner.vatBroj }}
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ partner.type }}</td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.kupac ? 'Da' : 'Ne' }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.dobavaljac ? 'Da' : 'Ne' }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.napomena }}
+              </td>
               <td
                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
               >
                 <a href="#" class="text-green-600 hover:text-green-900"
-                  >Edit<span class="sr-only">, {{ partner.name }}</span></a
+                  >Uredi<span class="sr-only">, {{ partner.nazivPartnera }}</span></a
                 >
               </td>
             </tr>
@@ -95,23 +109,27 @@ import Card from '@/components/CardComponent.vue'
 const partners = ref([
   {
     id: 1,
-    name: 'Ljekarne Vaše zdravlje',
-    street: 'Ilica 1',
-    postalCode: '10000',
-    city: 'Zagreb',
-    country: 'Croatia',
-    vatNumber: '123456789123',
-    type: 'Customer',
+    nazivPartnera: 'Ljekarne Vaše zdravlje',
+    adresa: 'Ilica 1',
+    postankiBroj: '10000',
+    grad: 'Zagreb',
+    drzava: 'Hrvatska',
+    vatBroj: '123456789123',
+    kupac: true,
+    dobavaljac: false,
+    napomena: 'Napomena o partneru',
   },
   {
     id: 2,
-    name: 'Oktal Pharma',
-    street: 'Strma ulica 45',
-    postalCode: '10000',
-    city: 'Zagreb',
-    country: 'Croatia',
-    vatNumber: '321987654321',
-    type: 'Supplier',
+    nazivPartnera: 'Oktal Pharma',
+    adresa: 'Strma ulica 45',
+    postankiBroj: '10000',
+    grad: 'Zagreb',
+    drzava: 'Hrvatska',
+    vatBroj: '321987654321',
+    kupac: false,
+    dobavaljac: true,
+    napomena: 'Napomena o partneru',
   },
   // Add more partners as needed
 ])

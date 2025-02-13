@@ -1,22 +1,22 @@
 <template>
-  <div class="min-h-screen bg-green-50">
-    <nav class="bg-white shadow-sm sticky top-0 z-[9999]" v-if="authStore.isAuthenticated">
+  <div class="min-h-screen bg-green-50 z-[9999]">
+    <nav class="bg-white shadow-sm sticky top-0" v-if="authStore.isAuthenticated">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
             <router-link to="/" class="flex-shrink-0 flex items-center" @click="closeMobileMenu">
               <img class="h-8 w-auto" src="/logo.svg" alt="Logo" />
               <span
-                class="ml-8 text-xl font-semibold hover:text-green-700 transition-all duration-300 ease-in-out"
+                class="ml-8 mr-6 text-xl font-semibold hover:text-green-700 transition-all duration-300 ease-in-out"
               >
-                Contact Manager
+                Imenik
               </span>
             </router-link>
             <!-- Desktop Navigation -->
             <div class="hidden lg:-my-px lg:ml-6 lg:flex lg:items-center lg:space-x-8">
-              <NavLink to="/" :exact="true">Dashboard</NavLink>
-              <NavLink to="/partners">Partners</NavLink>
-              <NavLink to="/contacts">Contacts</NavLink>
+              <NavLink to="/" :exact="true">Početna</NavLink>
+              <NavLink to="/partneri">Partneri</NavLink>
+              <NavLink to="/kontakti">Kontakti</NavLink>
               <!-- Settings dropdown for desktop (clickable) -->
               <div ref="desktopDropdownRef" class="relative inline-block">
                 <button
@@ -29,7 +29,7 @@
                       : 'border-transparent text-gray-600 hover:text-black hover:border-gray-400',
                   ]"
                 >
-                  Settings
+                  Postavke
                   <svg class="ml-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fill-rule="evenodd"
@@ -45,18 +45,18 @@
                     class="absolute left-0 mt-2 w-40 rounded-md bg-white shadow-lg z-10"
                   >
                     <router-link
-                      to="/settings/employees"
+                      to="/postavke/djelatnici"
                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       @click="desktopDropdownOpen = false"
                     >
-                      Employees
+                      Djelatnici
                     </router-link>
                     <router-link
-                      to="/settings/tags"
+                      to="/postavke/tagovi"
                       class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                       @click="desktopDropdownOpen = false"
                     >
-                      Tags
+                      Tagovi
                     </router-link>
                   </div>
                 </transition>
@@ -68,7 +68,7 @@
               @click="logout"
               class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out"
             >
-              Log out
+              Odjavi se
             </button>
           </div>
           <div class="flex items-center lg:hidden">
@@ -156,7 +156,7 @@
               @click="handleMobileLogout"
               class="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all duration-300 ease-in-out rounded-md"
             >
-              Log out
+              Odjavi se
             </button>
           </div>
         </div>
@@ -186,15 +186,15 @@ const desktopDropdownOpen = ref(false)
 const desktopDropdownRef = ref<HTMLElement | null>(null)
 
 const navLinks = [
-  { to: '/', text: 'Dashboard' },
-  { to: '/partners', text: 'Partners' },
-  { to: '/contacts', text: 'Contacts' },
+  { to: '/', text: 'Početna' },
+  { to: '/partneri', text: 'Partneri' },
+  { to: '/kontakti', text: 'Kontakti' },
   {
-    text: 'Settings',
-    to: '/settings', // fallback route if needed
+    text: 'Postavke',
+    to: '/postavke', // fallback route if needed
     children: [
-      { to: '/settings/employees', text: 'Employees' },
-      { to: '/settings/tags', text: 'Tags' },
+      { to: '/postavke/djelatnici', text: 'Djelatnici' },
+      { to: '/postavke/tagovi', text: 'Tagovi' },
     ],
   },
 ]
