@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-green-50 z-[9999]">
     <nav class="bg-white shadow-sm sticky top-0" v-if="authStore.isAuthenticated">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="container mx-auto px-4">
         <div class="flex justify-between h-16">
           <div class="flex">
             <router-link to="/" class="flex-shrink-0 flex items-center" @click="closeMobileMenu">
@@ -163,8 +163,8 @@
       </div>
     </nav>
 
-    <main class="py-10 px-4">
-      <div class="max-w-7xl mx-auto px-0 sm:px-4">
+    <main class="py-10">
+      <div class="container mx-auto px-4">
         <slot></slot>
       </div>
     </main>
