@@ -8,10 +8,9 @@
         <transition-group name="fade" tag="div" class="flex flex-wrap gap-4 overflow-x-auto">
           <span
             v-for="(tag, index) in tags"
-            :key="tag"
+            :key="tag.id"
             class="group flex items-center px-3 py-1 rounded-full md:text-md text-sm font-medium bg-green-100 text-green-800"
           >
-            <!-- Ako je ovaj tag u načinu uređivanja -->
             <template v-if="editingIndex === index">
               <input
                 type="text"
@@ -36,9 +35,8 @@
                 &#10005;
               </button>
             </template>
-            <!-- Normalan prikaz taga -->
             <template v-else>
-              {{ tag }}
+              {{ tag.naziv }}
               <button
                 type="button"
                 @click="startEdit(index)"
@@ -82,108 +80,101 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
+import api from '../api/axiosInstance.ts'
 import Card from '@/components/CardComponent.vue'
+import { RouterLink } from 'vue-router'
 
-// Lista tagova
-const tags = ref<string[]>([
-  'umjeravanje',
-  'ovjeravanje',
-  'smarthome',
-  'solari',
-  'lps',
-  'bps',
-  'farmaceutska industrija',
-  'veledrogerije',
-  'ljekarne',
-  'prehrambena',
-  'industrijsko vaganje',
-  'detekcija stranih tijela',
-])
+// Define the Tag interface (matches the backend's Tag entity)
+interface Tag {
+  id: number
+  naziv: string
+}
 
+// Reactive array to store the list of tags
+const tags = ref<Tag[]>([])
+
+// Reactive variable for the new tag input
 const newTag = ref('')
 
-// Omogućuje "Dodaj tag" gumb ako input nije prazan.
+// Compute whether the "Dodaj tag" button should be enabled
 const canAdd = computed(() => newTag.value.trim().length > 0)
 
-// Stanja za uređivanje taga
+// State for editing a tag
 const editingIndex = ref<number | null>(null)
 const editedTag = ref('')
 
-// Dodavanje novog taga.
+// Load tags from the backend on component mount
+async function loadTags(): Promise<void> {
+  try {
+    const response = await api.get('/api/tag')
+    // Assume response.data is an array of Tag objects
+    tags.value = response.data
+  } catch (error) {
+    console.error('Failed to load tags:', error)
+  }
+}
+
+// Add a new tag using a POST request
 const addTag = async (): Promise<void> => {
   const trimmedTag = newTag.value.trim()
   if (!trimmedTag) return
 
   try {
-    // Primjer POST zahtjeva za backend (prilagodite URL po potrebi)
-    await fetch('/api/tags', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tag: trimmedTag }),
-    })
-
-    // Na uspjeh, ažuriramo lokalno stanje.
-    tags.value.push(trimmedTag)
+    const response = await api.post('/api/tag', { naziv: trimmedTag })
+    // Add the new tag returned from the backend to our list
+    tags.value.push(response.data)
     newTag.value = ''
   } catch (error) {
     console.error('Neuspješno dodavanje taga:', error)
-    // Po želji, dodajte feedback korisniku.
   }
 }
 
-// Brisanje taga.
-const deleteTag = async (tagToDelete: string): Promise<void> => {
+// Delete a tag using a DELETE request
+const deleteTag = async (tagToDelete: Tag): Promise<void> => {
   try {
-    // Primjer DELETE zahtjeva (prilagodite URL po potrebi)
-    await fetch(`/api/tags/${encodeURIComponent(tagToDelete)}`, {
-      method: 'DELETE',
-    })
-
-    // Ažuriranje lokalnog stanja.
-    tags.value = tags.value.filter((tag) => tag !== tagToDelete)
+    await api.delete(`/api/tag/${tagToDelete.id}`)
+    tags.value = tags.value.filter((tag) => tag.id !== tagToDelete.id)
   } catch (error) {
     console.error('Greška pri brisanju taga:', error)
-    // Po želji, dodajte feedback korisniku.
   }
 }
 
-// Inicira uređivanje određenog taga.
+// Initiate editing for a tag
 const startEdit = (index: number): void => {
   editingIndex.value = index
-  editedTag.value = tags.value[index]
+  editedTag.value = tags.value[index].naziv
 }
 
-// Spremanje izmjena u tagu.
+// Save changes for an edited tag using a PUT request
 const saveEdit = async (index: number): Promise<void> => {
   const oldTag = tags.value[index]
   const newTagValue = editedTag.value.trim()
-  if (!newTagValue || newTagValue === oldTag) {
+  if (!newTagValue || newTagValue === oldTag.naziv) {
     editingIndex.value = null
     return
   }
   try {
-    // Primjer PUT zahtjeva za ažuriranje taga (prilagodite URL po potrebi)
-    await fetch(`/api/tags/${encodeURIComponent(oldTag)}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tag: newTagValue }),
+    const response = await api.put(`/api/tag/${oldTag.id}`, {
+      id: oldTag.id,
+      naziv: newTagValue,
     })
-
-    // Ažuriramo lokalno stanje.
-    tags.value[index] = newTagValue
+    tags.value[index] = response.data
     editingIndex.value = null
   } catch (error) {
     console.error('Neuspješno ažuriranje taga:', error)
-    // Po želji, dodajte feedback korisniku.
   }
 }
 
-// Prekid uređivanja.
+// Cancel editing
 const cancelEdit = (): void => {
   editingIndex.value = null
   editedTag.value = ''
 }
+
+onMounted(() => {
+  loadTags()
+})
 </script>
 
 <style scoped>

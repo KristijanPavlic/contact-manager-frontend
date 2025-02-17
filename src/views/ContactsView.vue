@@ -64,13 +64,13 @@
                 {{ contact.pozicija }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ contact.aktivan ? 'Da' : 'Ne' }}
+                {{ contact.jeAktivan ? 'Da' : 'Ne' }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ contact.napomena }}
               </td>
-              <!-- Dropdown with partner count -->
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <!-- PartnerDropdown component binds to contact.parnteri -->
                 <PartnerDropdown
                   v-model="contact.parnteri"
                   :availablePartners="availablePartners"
@@ -106,7 +106,7 @@
           </h3>
           <form @submit.prevent="submitContact">
             <div class="mb-4">
-              <label for="ime" class="block text-sm font-medium text-gray-700"> Ime </label>
+              <label for="ime" class="block text-sm font-medium text-gray-700">Ime</label>
               <input
                 type="text"
                 id="ime"
@@ -117,7 +117,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="prezime" class="block text-sm font-medium text-gray-700"> Prezime </label>
+              <label for="prezime" class="block text-sm font-medium text-gray-700">Prezime</label>
               <input
                 type="text"
                 id="prezime"
@@ -128,7 +128,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="email" class="block text-sm font-medium text-gray-700"> Email </label>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 id="email"
@@ -138,7 +138,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="telefon" class="block text-sm font-medium text-gray-700"> Telefon </label>
+              <label for="telefon" class="block text-sm font-medium text-gray-700">Telefon</label>
               <input
                 type="text"
                 id="telefon"
@@ -148,7 +148,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="mobitel" class="block text-sm font-medium text-gray-700"> Mobitel </label>
+              <label for="mobitel" class="block text-sm font-medium text-gray-700">Mobitel</label>
               <input
                 type="text"
                 id="mobitel"
@@ -158,9 +158,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="pozicija" class="block text-sm font-medium text-gray-700">
-                Pozicija
-              </label>
+              <label for="pozicija" class="block text-sm font-medium text-gray-700">Pozicija</label>
               <input
                 type="text"
                 id="pozicija"
@@ -173,15 +171,13 @@
               <input
                 type="checkbox"
                 id="aktivan"
-                v-model="newContact.aktivan"
+                v-model="newContact.jeAktivan"
                 class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
               />
-              <label for="aktivan" class="ml-2 block text-sm text-gray-700"> Aktivan </label>
+              <label for="aktivan" class="ml-2 block text-sm text-gray-700">Aktivan</label>
             </div>
             <div class="mb-4">
-              <label for="napomena" class="block text-sm font-medium text-gray-700">
-                Napomena
-              </label>
+              <label for="napomena" class="block text-sm font-medium text-gray-700">Napomena</label>
               <textarea
                 id="napomena"
                 placeholder="Unesite napomenu"
@@ -197,7 +193,7 @@
                 :availablePartners="availablePartners"
               />
             </div>
-            <div class="flex justify-end">
+            <div class="flex justify-end mt-4">
               <button
                 type="button"
                 @click="closeContactModal"
@@ -220,7 +216,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '../api/axiosInstance.ts'
 import Card from '@/components/CardComponent.vue'
 import PartnerDropdown from '@/components/PartnerDropdown.vue'
 
@@ -232,156 +229,13 @@ interface Contact {
   telefon: string
   mobitel: string
   pozicija: string
-  aktivan: boolean
+  jeAktivan: boolean
   napomena: string
   parnteri: string[]
 }
 
-const availablePartners = [
-  'Feroimpex',
-  'Oktal Pharma',
-  'Ljekarne Zagreb',
-  'Ljekarne Vaše zdravlje',
-  'Pharma Plus',
-  'Medika',
-  'Ljekarne Prima',
-  'Pharma Store',
-  'Ljekarne Zdravlje',
-  'Pharma Med',
-  'Tech Solutions',
-  'IT Hub',
-  'Finance Corp',
-  'Money Matters',
-  'Operations Inc',
-  'Efficiency Experts',
-  'Customer Care',
-  'Service Solutions',
-  'Logistics Plus',
-  'Transport Solutions',
-]
-
-const contacts = ref<Contact[]>([
-  {
-    id: 1,
-    ime: 'Pero',
-    prezime: 'Perić',
-    email: 'pero.peric@mail.com',
-    telefon: '+385 1 123 4567',
-    mobitel: '+385 91 000 0000',
-    pozicija: 'Voditelj kvalitete',
-    aktivan: true,
-    napomena: 'Jako ljubazan',
-    parnteri: ['Feroimpex', 'Oktal Pharma'],
-  },
-  {
-    id: 2,
-    ime: 'Ivan',
-    prezime: 'Horavt',
-    email: 'ivan.horvat@mail.com',
-    telefon: '+385 1 564 0094',
-    mobitel: '+385 95 123 4567',
-    pozicija: 'Voditelj nabave',
-    aktivan: false,
-    napomena: 'Nepouzdan',
-    parnteri: ['Ljekarne Zagreb', 'Ljekarne Vaše zdravlje'],
-  },
-  {
-    id: 3,
-    ime: 'Ana',
-    prezime: 'Anić',
-    email: 'ana.anic@mail.com',
-    telefon: '+385 1 234 5678',
-    mobitel: '+385 91 111 1111',
-    pozicija: 'Marketing Manager',
-    aktivan: true,
-    napomena: 'Vrlo profesionalna',
-    parnteri: ['Pharma Plus', 'Medika'],
-  },
-  {
-    id: 4,
-    ime: 'Marko',
-    prezime: 'Markić',
-    email: 'marko.markic@mail.com',
-    telefon: '+385 1 345 6789',
-    mobitel: '+385 91 222 2222',
-    pozicija: 'Sales Manager',
-    aktivan: true,
-    napomena: 'Odličan pregovarač',
-    parnteri: ['Ljekarne Prima', 'Pharma Store'],
-  },
-  {
-    id: 5,
-    ime: 'Ivana',
-    prezime: 'Ivić',
-    email: 'ivana.ivic@mail.com',
-    telefon: '+385 1 456 7890',
-    mobitel: '+385 91 333 3333',
-    pozicija: 'HR Manager',
-    aktivan: true,
-    napomena: 'Vrlo organizirana',
-    parnteri: ['Ljekarne Zdravlje', 'Pharma Med'],
-  },
-  {
-    id: 6,
-    ime: 'Petar',
-    prezime: 'Petrović',
-    email: 'petar.petrovic@mail.com',
-    telefon: '+385 1 567 8901',
-    mobitel: '+385 91 444 4444',
-    pozicija: 'IT Manager',
-    aktivan: true,
-    napomena: 'Vrlo tehnički potkovan',
-    parnteri: ['Tech Solutions', 'IT Hub'],
-  },
-  {
-    id: 7,
-    ime: 'Maja',
-    prezime: 'Majić',
-    email: 'maja.majic@mail.com',
-    telefon: '+385 1 678 9012',
-    mobitel: '+385 91 555 5555',
-    pozicija: 'Finance Manager',
-    aktivan: true,
-    napomena: 'Vrlo precizna',
-    parnteri: ['Finance Corp', 'Money Matters'],
-  },
-  {
-    id: 8,
-    ime: 'Luka',
-    prezime: 'Lukić',
-    email: 'luka.lukic@mail.com',
-    telefon: '+385 1 789 0123',
-    mobitel: '+385 91 666 6666',
-    pozicija: 'Operations Manager',
-    aktivan: true,
-    napomena: 'Vrlo učinkovit',
-    parnteri: ['Operations Inc', 'Efficiency Experts'],
-  },
-  {
-    id: 9,
-    ime: 'Sara',
-    prezime: 'Sarić',
-    email: 'sara.saric@mail.com',
-    telefon: '+385 1 890 1234',
-    mobitel: '+385 91 777 7777',
-    pozicija: 'Customer Service Manager',
-    aktivan: true,
-    napomena: 'Vrlo ljubazna',
-    parnteri: ['Customer Care', 'Service Solutions'],
-  },
-  {
-    id: 10,
-    ime: 'Tomislav',
-    prezime: 'Tomić',
-    email: 'tomislav.tomic@mail.com',
-    telefon: '+385 1 901 2345',
-    mobitel: '+385 91 888 8888',
-    pozicija: 'Logistics Manager',
-    aktivan: true,
-    napomena: 'Vrlo organiziran',
-    parnteri: ['Logistics Plus', 'Transport Solutions'],
-  },
-])
+const contacts = ref<Contact[]>([])
+const availablePartners = ref<string[]>([])
 
 const showContactModal = ref(false)
 const isEditing = ref(false)
@@ -394,10 +248,31 @@ const newContact = ref<Contact>({
   telefon: '',
   mobitel: '',
   pozicija: '',
-  aktivan: false,
+  jeAktivan: false,
   napomena: '',
   parnteri: [],
 })
+
+// Load contacts from the backend
+async function loadContacts() {
+  try {
+    const response = await api.get('/api/contact')
+    contacts.value = response.data
+  } catch (error) {
+    console.error('Failed to load contacts:', error)
+  }
+}
+
+// Load available partners from the backend
+async function loadAvailablePartners() {
+  try {
+    const response = await api.get('/api/contact')
+    // Map the partners to an array of partner names (or VAT numbers as needed)
+    availablePartners.value = response.data.map((p: { nazivPartnera: string }) => p.nazivPartnera)
+  } catch (error) {
+    console.error('Failed to load available partners:', error)
+  }
+}
 
 function openAddContactModal() {
   resetNewContact()
@@ -424,23 +299,76 @@ function resetNewContact() {
     telefon: '',
     mobitel: '',
     pozicija: '',
-    aktivan: false,
+    jeAktivan: false,
     napomena: '',
     parnteri: [],
   }
 }
 
-function submitContact() {
-  if (isEditing.value) {
-    const index = contacts.value.findIndex((c) => c.id === newContact.value.id)
-    if (index !== -1) {
-      contacts.value[index] = { ...newContact.value }
-    }
-  } else {
-    const newId = contacts.value.length ? Math.max(...contacts.value.map((c) => c.id)) + 1 : 1
-    newContact.value.id = newId
-    contacts.value.push({ ...newContact.value })
+async function submitContact() {
+  // Prepare the payload. We use the first partner (if any) as the partner to associate with.
+  const payload = {
+    ime: newContact.value.ime,
+    prezime: newContact.value.prezime,
+    email: newContact.value.email,
+    telefon: newContact.value.telefon,
+    mobitel: newContact.value.mobitel,
+    pozicija: newContact.value.pozicija,
+    jeAktivan: newContact.value.jeAktivan,
+    napomena: newContact.value.napomena,
+    CreatedById: 1, // Replace with the actual logged-in employee's ID as needed
+    VATBrojPartnera: newContact.value.parnteri.length > 0 ? newContact.value.parnteri[0] : '',
   }
-  closeContactModal()
+
+  try {
+    if (isEditing.value) {
+      // Update existing contact via PUT
+      await api.put(`/api/contact/${newContact.value.id}`, payload)
+    } else {
+      // Create new contact via POST
+      await api.post('/api/contact', payload)
+    }
+    await loadContacts()
+    closeContactModal()
+  } catch (error) {
+    console.error('Failed to submit contact:', error)
+  }
 }
+
+onMounted(() => {
+  loadContacts()
+  loadAvailablePartners()
+})
 </script>
+
+<style scoped>
+/* Firefox scrollbar styling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #101828 transparent;
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #6a7282;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #101828;
+  transition: all 0.3s ease-in-out;
+}
+</style>

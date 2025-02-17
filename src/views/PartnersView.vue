@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <!-- Zaglavlje -->
+    <!-- Header -->
     <div class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
         <h2 class="text-3xl font-bold text-gray-900">Partneri</h2>
@@ -19,43 +19,26 @@
       </div>
     </div>
 
-    <!-- Tablica partnera -->
+    <!-- Partners Table -->
     <Card>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-300">
           <thead>
             <tr>
-              <th
-                scope="col"
-                class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-              >
+              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                 Naziv partnera
               </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Adresa
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Adresa</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Poštanski broj
               </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Grad
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Država
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                VAT broj
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Kupac
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Dobavljač
-              </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Napomena
-              </th>
-              <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Grad</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Država</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">VAT broj</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Kupac</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dobavljač</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Napomena</th>
+              <th class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                 <span class="sr-only">Uredi</span>
               </th>
             </tr>
@@ -71,7 +54,7 @@
                 {{ partner.adresa }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.postankiBroj }}
+                {{ partner.postanskiBroj }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.grad }}
@@ -83,10 +66,10 @@
                 {{ partner.vatBroj }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.kupac ? 'Da' : 'Ne' }}
+                {{ partner.jeKupac ? 'Da' : 'Ne' }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.dobavaljac ? 'Da' : 'Ne' }}
+                {{ partner.jeDobavaljac ? 'Da' : 'Ne' }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.napomena }}
@@ -108,7 +91,7 @@
       </div>
     </Card>
 
-    <!-- Modal za dodavanje/uređivanje partnera -->
+    <!-- Modal for Adding/Editing Partner -->
     <teleport to="body">
       <div
         v-if="showPartnerModal"
@@ -136,7 +119,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="adresa" class="block text-sm font-medium text-gray-700"> Adresa </label>
+              <label for="adresa" class="block text-sm font-medium text-gray-700">Adresa</label>
               <input
                 type="text"
                 id="adresa"
@@ -147,20 +130,20 @@
               />
             </div>
             <div class="mb-4">
-              <label for="postankiBroj" class="block text-sm font-medium text-gray-700">
+              <label for="postanskiBroj" class="block text-sm font-medium text-gray-700">
                 Poštanski broj
               </label>
               <input
                 type="text"
-                id="postankiBroj"
+                id="postanskiBroj"
                 placeholder="Unesite poštanski broj"
-                v-model="newPartner.postankiBroj"
+                v-model="newPartner.postanskiBroj"
                 required
                 class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
             <div class="mb-4">
-              <label for="grad" class="block text-sm font-medium text-gray-700"> Grad </label>
+              <label for="grad" class="block text-sm font-medium text-gray-700">Grad</label>
               <input
                 type="text"
                 id="grad"
@@ -171,7 +154,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="drzava" class="block text-sm font-medium text-gray-700"> Država </label>
+              <label for="drzava" class="block text-sm font-medium text-gray-700">Država</label>
               <input
                 type="text"
                 id="drzava"
@@ -182,9 +165,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="vatBroj" class="block text-sm font-medium text-gray-700">
-                VAT broj
-              </label>
+              <label for="vatBroj" class="block text-sm font-medium text-gray-700">VAT broj</label>
               <input
                 type="text"
                 id="vatBroj"
@@ -194,7 +175,7 @@
                 class="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
             </div>
-            <!-- Radio buttons za odabir vrste partnera -->
+            <!-- Radio buttons for selecting partner type -->
             <div class="mb-4">
               <span class="block text-sm font-medium text-gray-700">Vrsta partnera</span>
               <div class="mt-2 flex items-center">
@@ -219,9 +200,7 @@
               </div>
             </div>
             <div class="mb-4">
-              <label for="napomena" class="block text-sm font-medium text-gray-700">
-                Napomena
-              </label>
+              <label for="napomena" class="block text-sm font-medium text-gray-700">Napomena</label>
               <textarea
                 id="napomena"
                 placeholder="Unesite napomenu"
@@ -253,145 +232,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import api from '@/api/axiosInstance'
 import Card from '@/components/CardComponent.vue'
 
-interface Partner {
+interface IPartner {
   id: number
   nazivPartnera: string
   adresa: string
-  postankiBroj: string
+  postanskiBroj: string
   grad: string
   drzava: string
   vatBroj: string
-  kupac: boolean
-  dobavaljac: boolean
+  jeKupac: boolean
+  jeDobavaljac: boolean
   napomena: string
 }
 
-// Statički popis partnera (kasnije možete zamijeniti s API pozivom)
-const partners = ref<Partner[]>([
-  {
-    id: 1,
-    nazivPartnera: 'Ljekarne Vaše zdravlje',
-    adresa: 'Ilica 1',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '123456789123',
-    kupac: true,
-    dobavaljac: false,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 2,
-    nazivPartnera: 'Oktal Pharma',
-    adresa: 'Strma ulica 45',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '321987654321',
-    kupac: false,
-    dobavaljac: true,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 3,
-    nazivPartnera: 'Pharma Plus',
-    adresa: 'Ulica 2',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '456789123456',
-    kupac: true,
-    dobavaljac: false,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 4,
-    nazivPartnera: 'Medika',
-    adresa: 'Ulica 3',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '789123456789',
-    kupac: false,
-    dobavaljac: true,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 5,
-    nazivPartnera: 'Ljekarne Prima',
-    adresa: 'Ulica 4',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '987654321987',
-    kupac: true,
-    dobavaljac: false,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 6,
-    nazivPartnera: 'Pharma Store',
-    adresa: 'Ulica 5',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '654321987654',
-    kupac: false,
-    dobavaljac: true,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 7,
-    nazivPartnera: 'Ljekarne Zdravlje',
-    adresa: 'Ulica 6',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '321654987321',
-    kupac: true,
-    dobavaljac: false,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 8,
-    nazivPartnera: 'Pharma Med',
-    adresa: 'Ulica 7',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '654987321654',
-    kupac: false,
-    dobavaljac: true,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 9,
-    nazivPartnera: 'Tech Solutions',
-    adresa: 'Ulica 8',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '987321654987',
-    kupac: true,
-    dobavaljac: false,
-    napomena: 'Napomena o partneru',
-  },
-  {
-    id: 10,
-    nazivPartnera: 'IT Hub',
-    adresa: 'Ulica 9',
-    postankiBroj: '10000',
-    grad: 'Zagreb',
-    drzava: 'Hrvatska',
-    vatBroj: '321987654321',
-    kupac: false,
-    dobavaljac: true,
-    napomena: 'Napomena o partneru',
-  },
-])
+const partners = ref<IPartner[]>([])
 
 const showPartnerModal = ref(false)
 const isEditing = ref(false)
@@ -400,7 +258,7 @@ const newPartner = ref({
   id: 0,
   nazivPartnera: '',
   adresa: '',
-  postankiBroj: '',
+  postanskiBroj: '',
   grad: '',
   drzava: '',
   vatBroj: '',
@@ -408,16 +266,33 @@ const newPartner = ref({
   napomena: '',
 })
 
+// Load partners from backend
+async function loadPartners() {
+  try {
+    const response = await api.get('/api/partner')
+    partners.value = response.data
+  } catch (error) {
+    console.error('Failed to load partners:', error)
+  }
+}
+
 function openAddPartnerModal() {
   resetNewPartner()
   isEditing.value = false
   showPartnerModal.value = true
 }
 
-function openEditPartnerModal(partner: Partner) {
+function openEditPartnerModal(partner: IPartner) {
   newPartner.value = {
-    ...partner,
-    tipPartnera: partner.kupac ? 'kupac' : 'dobavaljac',
+    id: partner.id,
+    nazivPartnera: partner.nazivPartnera,
+    adresa: partner.adresa,
+    postanskiBroj: partner.postanskiBroj,
+    grad: partner.grad,
+    drzava: partner.drzava,
+    vatBroj: partner.vatBroj,
+    tipPartnera: partner.jeKupac ? 'kupac' : 'dobavaljac',
+    napomena: partner.napomena,
   }
   isEditing.value = true
   showPartnerModal.value = true
@@ -432,7 +307,7 @@ function resetNewPartner() {
     id: 0,
     nazivPartnera: '',
     adresa: '',
-    postankiBroj: '',
+    postanskiBroj: '',
     grad: '',
     drzava: '',
     vatBroj: '',
@@ -447,31 +322,66 @@ async function submitPartner() {
     return
   }
 
-  if (isEditing.value) {
-    const index = partners.value.findIndex((p) => p.id === newPartner.value.id)
-    if (index !== -1) {
-      partners.value[index] = {
-        ...newPartner.value,
-        kupac: newPartner.value.tipPartnera === 'kupac',
-        dobavaljac: newPartner.value.tipPartnera === 'dobavaljac',
-      }
-    }
-  } else {
-    const newId = partners.value.length ? Math.max(...partners.value.map((p) => p.id)) + 1 : 1
-    const partnerToAdd = {
-      id: newId,
-      nazivPartnera: newPartner.value.nazivPartnera,
-      adresa: newPartner.value.adresa,
-      postankiBroj: newPartner.value.postankiBroj,
-      grad: newPartner.value.grad,
-      drzava: newPartner.value.drzava,
-      vatBroj: newPartner.value.vatBroj,
-      kupac: newPartner.value.tipPartnera === 'kupac',
-      dobavaljac: newPartner.value.tipPartnera === 'dobavaljac',
-      napomena: newPartner.value.napomena,
-    }
-    partners.value.push(partnerToAdd)
+  const userId = getUserIdFromToken()
+  if (!userId) {
+    alert('Nije moguće odrediti ID korisnika iz tokena. Molimo prijavite se ponovo.')
+    return
   }
-  closePartnerModal()
+
+  const partnerPayload = {
+    nazivPartnera: newPartner.value.nazivPartnera,
+    adresa: newPartner.value.adresa,
+    postanskiBroj: newPartner.value.postanskiBroj,
+    grad: newPartner.value.grad,
+    drzava: newPartner.value.drzava,
+    vatBroj: newPartner.value.vatBroj,
+    jeKupac: newPartner.value.tipPartnera === 'kupac',
+    jeDobavaljac: newPartner.value.tipPartnera === 'dobavaljac',
+    napomena: newPartner.value.napomena,
+    CreatedById: 1, // dynamically set from token
+  }
+
+  try {
+    if (isEditing.value) {
+      await api.put(`/api/partner/${newPartner.value.id}`, partnerPayload)
+    } else {
+      await api.post('/api/partner', partnerPayload)
+    }
+    await loadPartners()
+    closePartnerModal()
+  } catch (error) {
+    console.error('Failed to submit partner:', error)
+  }
 }
+
+onMounted(() => {
+  loadPartners()
+})
 </script>
+
+<style scoped>
+/* Custom scrollbar styling (optional) */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #101828 transparent;
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #6a7282;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #101828;
+  transition: all 0.3s ease-in-out;
+}
+</style>
