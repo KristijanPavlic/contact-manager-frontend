@@ -322,12 +322,6 @@ async function submitPartner() {
     return
   }
 
-  const userId = getUserIdFromToken()
-  if (!userId) {
-    alert('Nije moguće odrediti ID korisnika iz tokena. Molimo prijavite se ponovo.')
-    return
-  }
-
   const partnerPayload = {
     nazivPartnera: newPartner.value.nazivPartnera,
     adresa: newPartner.value.adresa,
