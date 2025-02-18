@@ -25,7 +25,7 @@
                 class="px-2 py-1 border border-gray-300 rounded"
                 @keyup.enter="saveEdit(tag)"
                 ref="editInput"
-                @focus="$event.target.select()"
+                @focus="($event.target as HTMLInputElement)?.select()"
               />
               <button
                 type="button"
