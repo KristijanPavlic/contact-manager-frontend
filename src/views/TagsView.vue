@@ -5,41 +5,53 @@
     <div>
       <Card>
         <h2 class="text-lg font-medium text-gray-900 mb-4">Tagovi</h2>
-        <transition-group name="fade" tag="div" class="flex flex-wrap gap-4 overflow-x-auto">
-          <span
-            v-for="(tag, index) in tags"
-            :key="tag.id"
+        <div v-if="isLoading" class="text-center py-4">
+          <span class="text-gray-600">Učitavanje tagova...</span>
+        </div>
+        <div v-else-if="error" class="text-center py-4">
+          <span class="text-red-600">{{ error }}</span>
+        </div>
+        <transition-group v-else name="fade" tag="div" class="flex flex-wrap gap-4 overflow-x-auto">
+          <div
+            v-for="tag in tags"
+            :key="`tag-${tag.id}`"
             class="group flex items-center px-3 py-1 rounded-full md:text-md text-sm font-medium bg-green-100 text-green-800"
           >
-            <template v-if="editingIndex === index">
+            <template v-if="editingTagId === tag.id">
               <input
                 type="text"
-                v-model.trim="editedTag"
+                v-model="editedTagName"
                 maxlength="50"
                 class="px-2 py-1 border border-gray-300 rounded"
+                @keyup.enter="saveEdit(tag)"
+                ref="editInput"
+                @focus="$event.target.select()"
               />
               <button
                 type="button"
-                @click="saveEdit(index)"
+                @click="saveEdit(tag)"
                 class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
                 title="Spremi promjene"
+                :disabled="isEditing"
               >
-                &#10003;
+                <span v-if="isEditing">...</span>
+                <span v-else>&#10003;</span>
               </button>
               <button
                 type="button"
                 @click="cancelEdit"
                 class="ml-2 text-lg transition-opacity duration-200 text-gray-500 hover:text-gray-700 focus:outline-none"
                 title="Otkaži"
+                :disabled="isEditing"
               >
                 &#10005;
               </button>
             </template>
             <template v-else>
-              {{ tag.naziv }}
+              <span>{{ tag.naziv }}</span>
               <button
                 type="button"
-                @click="startEdit(index)"
+                @click="startEdit(tag)"
                 class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
                 title="Uredi tag"
               >
@@ -50,11 +62,13 @@
                 @click="deleteTag(tag)"
                 class="ml-2 text-lg transition-opacity duration-200 text-red-500 hover:text-red-700 focus:outline-none"
                 title="Izbriši tag"
+                :disabled="isDeleting === tag.id"
               >
-                &times;
+                <span v-if="isDeleting === tag.id">...</span>
+                <span v-else>&times;</span>
               </button>
             </template>
-          </span>
+          </div>
         </transition-group>
         <form @submit.prevent="addTag" class="mt-4">
           <div class="flex rounded-md shadow-sm">
@@ -67,10 +81,11 @@
             />
             <button
               type="submit"
-              :disabled="!canAdd"
+              :disabled="!canAdd || isAdding"
               class="-ml-px inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Dodaj tag
+              <span v-if="isAdding">Dodavanje...</span>
+              <span v-else>Dodaj tag</span>
             </button>
           </div>
         </form>
@@ -80,96 +95,119 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, nextTick } from 'vue'
 import api from '../api/axiosInstance.ts'
 import Card from '@/components/CardComponent.vue'
 import { RouterLink } from 'vue-router'
 
-// Define the Tag interface (matches the backend's Tag entity)
 interface Tag {
   id: number
   naziv: string
 }
 
-// Reactive array to store the list of tags
 const tags = ref<Tag[]>([])
-
-// Reactive variable for the new tag input
 const newTag = ref('')
-
-// Compute whether the "Dodaj tag" button should be enabled
 const canAdd = computed(() => newTag.value.trim().length > 0)
+const editingTagId = ref<number | null>(null)
+const editedTagName = ref('')
+const editInput = ref<HTMLInputElement | null>(null)
 
-// State for editing a tag
-const editingIndex = ref<number | null>(null)
-const editedTag = ref('')
+const isLoading = ref(true)
+const error = ref('')
+const isAdding = ref(false)
+const isDeleting = ref<number | null>(null)
+const isEditing = ref(false)
 
-// Load tags from the backend on component mount
 async function loadTags(): Promise<void> {
+  isLoading.value = true
+  error.value = ''
   try {
     const response = await api.get('/api/tag')
-    // Assume response.data is an array of Tag objects
     tags.value = response.data
-  } catch (error) {
-    console.error('Failed to load tags:', error)
+  } catch (err) {
+    error.value = 'Greška pri učitavanju tagova. Molimo pokušajte ponovno.'
+    console.error('Failed to load tags:', err)
+  } finally {
+    isLoading.value = false
   }
 }
 
-// Add a new tag using a POST request
 const addTag = async (): Promise<void> => {
   const trimmedTag = newTag.value.trim()
   if (!trimmedTag) return
 
+  isAdding.value = true
   try {
     const response = await api.post('/api/tag', { naziv: trimmedTag })
-    // Add the new tag returned from the backend to our list
-    tags.value.push(response.data)
+    tags.value = [...tags.value, response.data]
     newTag.value = ''
-  } catch (error) {
-    console.error('Neuspješno dodavanje taga:', error)
+  } catch (err) {
+    error.value = 'Greška pri dodavanju taga. Molimo pokušajte ponovno.'
+    console.error('Neuspješno dodavanje taga:', err)
+  } finally {
+    isAdding.value = false
   }
 }
 
-// Delete a tag using a DELETE request
 const deleteTag = async (tagToDelete: Tag): Promise<void> => {
+  isDeleting.value = tagToDelete.id
   try {
     await api.delete(`/api/tag/${tagToDelete.id}`)
     tags.value = tags.value.filter((tag) => tag.id !== tagToDelete.id)
-  } catch (error) {
-    console.error('Greška pri brisanju taga:', error)
+  } catch (err) {
+    error.value = 'Greška pri brisanju taga. Molimo pokušajte ponovno.'
+    console.error('Greška pri brisanju taga:', err)
+  } finally {
+    isDeleting.value = null
   }
 }
 
-// Initiate editing for a tag
-const startEdit = (index: number): void => {
-  editingIndex.value = index
-  editedTag.value = tags.value[index].naziv
+const startEdit = async (tag: Tag): Promise<void> => {
+  editingTagId.value = tag.id
+  editedTagName.value = tag.naziv
+  await nextTick()
+  if (editInput.value) {
+    editInput.value.focus()
+  }
 }
 
-// Save changes for an edited tag using a PUT request
-const saveEdit = async (index: number): Promise<void> => {
-  const oldTag = tags.value[index]
-  const newTagValue = editedTag.value.trim()
-  if (!newTagValue || newTagValue === oldTag.naziv) {
-    editingIndex.value = null
+const saveEdit = async (tag: Tag): Promise<void> => {
+  const newTagValue = editedTagName.value.trim()
+  if (!newTagValue || newTagValue === tag.naziv) {
+    editingTagId.value = null
     return
   }
+
+  isEditing.value = true
   try {
-    const response = await api.put(`/api/tag/${oldTag.id}`, {
-      id: oldTag.id,
+    const response = await api.put(`/api/tag/${tag.id}`, {
+      id: tag.id,
       naziv: newTagValue,
     })
-    tags.value[index] = response.data
-    editingIndex.value = null
-  } catch (error) {
-    console.error('Neuspješno ažuriranje taga:', error)
+
+    // Find the index of the tag we're updating
+    const tagIndex = tags.value.findIndex((t) => t.id === tag.id)
+    if (tagIndex !== -1) {
+      // Create a new array with the updated tag
+      const updatedTags = [...tags.value]
+      updatedTags[tagIndex] = { ...response.data }
+      // tags.value = updatedTags
+      tags.value[tagIndex] = { ...tags.value[tagIndex], naziv: newTagValue }
+    }
+
+    editingTagId.value = null
+    editedTagName.value = ''
+  } catch (err) {
+    error.value = 'Greška pri ažuriranju taga. Molimo pokušajte ponovno.'
+    console.error('Neuspješno ažuriranje taga:', err)
+  } finally {
+    isEditing.value = false
   }
 }
 
-// Cancel editing
 const cancelEdit = (): void => {
-  editingIndex.value = null
-  editedTag.value = ''
+  editingTagId.value = null
+  editedTagName.value = ''
 }
 
 onMounted(() => {
