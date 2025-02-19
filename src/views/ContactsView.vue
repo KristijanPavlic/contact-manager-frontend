@@ -218,6 +218,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '../api/axiosInstance.ts'
+import { jwtDecode } from 'jwt-decode'
 import Card from '@/components/CardComponent.vue'
 import PartnerDropdown from '@/components/PartnerDropdown.vue'
 
@@ -232,6 +233,12 @@ interface Contact {
   jeAktivan: boolean
   napomena: string
   parnteri: string[]
+}
+
+interface IJwtPayload {
+  nameid?: string
+  sub?: string
+  // add other claims if needed
 }
 
 const contacts = ref<Contact[]>([])
@@ -305,6 +312,26 @@ function resetNewContact() {
   }
 }
 
+function getUserIdFromToken(): number | null {
+  const token = localStorage.getItem('token')
+  if (!token) {
+    console.error('Token not found in localStorage')
+    return null
+  }
+  try {
+    const decoded = jwtDecode(token) as IJwtPayload
+    // Prefer "nameid" if available; otherwise, use "sub"
+    const userIdStr = decoded.nameid || decoded.sub
+    const userId = userIdStr ? parseInt(userIdStr, 10) : null
+    return userId
+  } catch (error) {
+    console.error('Failed to decode token:', error)
+    return null
+  }
+}
+
+const userId = getUserIdFromToken()
+
 async function submitContact() {
   // Prepare the payload. We use the first partner (if any) as the partner to associate with.
   const payload = {
@@ -316,7 +343,7 @@ async function submitContact() {
     pozicija: newContact.value.pozicija,
     jeAktivan: newContact.value.jeAktivan,
     napomena: newContact.value.napomena,
-    CreatedById: 1, // Replace with the actual logged-in employee's ID as needed
+    CreatedById: userId, // Replace with the actual logged-in employee's ID as needed
     VATBrojPartnera: newContact.value.parnteri.length > 0 ? newContact.value.parnteri[0] : '',
   }
 

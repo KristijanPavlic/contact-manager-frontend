@@ -56,9 +56,7 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.postanskiBroj }}
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                {{ partner.grad }}
-              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ partner.grad }}</td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.drzava }}
               </td>
@@ -74,9 +72,7 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.napomena }}
               </td>
-              <td
-                class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6"
-              >
+              <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                 <a
                   href="#"
                   @click.prevent="openEditPartnerModal(partner)"
@@ -84,6 +80,12 @@
                 >
                   Uredi<span class="sr-only">, {{ partner.nazivPartnera }}</span>
                 </a>
+                <button
+                  @click.prevent="deletePartner(partner)"
+                  class="ml-2 text-red-600 hover:text-red-900"
+                >
+                  Izbriši
+                </button>
               </td>
             </tr>
           </tbody>
@@ -106,9 +108,9 @@
           </h3>
           <form @submit.prevent="submitPartner">
             <div class="mb-4">
-              <label for="nazivPartnera" class="block text-sm font-medium text-gray-700">
-                Naziv partnera
-              </label>
+              <label for="nazivPartnera" class="block text-sm font-medium text-gray-700"
+                >Naziv partnera</label
+              >
               <input
                 type="text"
                 id="nazivPartnera"
@@ -130,9 +132,9 @@
               />
             </div>
             <div class="mb-4">
-              <label for="postanskiBroj" class="block text-sm font-medium text-gray-700">
-                Poštanski broj
-              </label>
+              <label for="postanskiBroj" class="block text-sm font-medium text-gray-700"
+                >Poštanski broj</label
+              >
               <input
                 type="text"
                 id="postanskiBroj"
@@ -234,6 +236,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/api/axiosInstance'
+import { jwtDecode } from 'jwt-decode'
 import Card from '@/components/CardComponent.vue'
 
 interface IPartner {
@@ -247,6 +250,11 @@ interface IPartner {
   jeKupac: boolean
   jeDobavaljac: boolean
   napomena: string
+}
+
+interface IJwtPayload {
+  nameid?: string
+  sub?: string
 }
 
 const partners = ref<IPartner[]>([])
@@ -266,7 +274,22 @@ const newPartner = ref({
   napomena: '',
 })
 
-// Load partners from backend
+// Extract user ID from token
+function getUserIdFromToken(): number | null {
+  const token = localStorage.getItem('token')
+  if (!token) return null
+  try {
+    const decoded = jwtDecode(token) as IJwtPayload
+    const userIdStr = decoded.nameid || decoded.sub
+    return userIdStr ? parseInt(userIdStr, 10) : null
+  } catch (error) {
+    console.error('Failed to decode token:', error)
+    return null
+  }
+}
+
+const userId = getUserIdFromToken()
+
 async function loadPartners() {
   try {
     const response = await api.get('/api/partner')
@@ -322,7 +345,9 @@ async function submitPartner() {
     return
   }
 
+  // Build payload including partner id for updates.
   const partnerPayload = {
+    id: newPartner.value.id, // required for update
     nazivPartnera: newPartner.value.nazivPartnera,
     adresa: newPartner.value.adresa,
     postanskiBroj: newPartner.value.postanskiBroj,
@@ -332,7 +357,7 @@ async function submitPartner() {
     jeKupac: newPartner.value.tipPartnera === 'kupac',
     jeDobavaljac: newPartner.value.tipPartnera === 'dobavaljac',
     napomena: newPartner.value.napomena,
-    CreatedById: 1, // dynamically set from token
+    CreatedById: userId, // dynamically set from token
   }
 
   try {
@@ -348,13 +373,23 @@ async function submitPartner() {
   }
 }
 
+async function deletePartner(partner: IPartner) {
+  if (confirm(`Jeste li sigurni da želite izbrisati partnera: ${partner.nazivPartnera}?`)) {
+    try {
+      await api.delete(`/api/partner/${partner.id}`)
+      await loadPartners()
+    } catch (error) {
+      console.error('Failed to delete partner:', error)
+    }
+  }
+}
+
 onMounted(() => {
   loadPartners()
 })
 </script>
 
 <style scoped>
-/* Custom scrollbar styling (optional) */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #101828 transparent;
