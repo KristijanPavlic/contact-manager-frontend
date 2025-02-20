@@ -1,7 +1,13 @@
 <template>
   <div class="space-y-6">
-    <!-- Header and Add Contact Button -->
-    <div class="sm:flex sm:items-center">
+    <!-- Loading and error messages -->
+    <div v-if="isLoading" class="text-center text-gray-600">Učitavam kontakte...</div>
+    <div v-if="errorMessage" class="text-center text-red-600">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Header and Add Contact Button (hidden while loading) -->
+    <div v-if="!isLoading" class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
         <h2 class="text-3xl font-bold text-gray-900">Kontakti</h2>
         <p class="mt-2 text-sm text-gray-700">
@@ -20,7 +26,7 @@
     </div>
 
     <!-- Contacts Table -->
-    <Card>
+    <Card v-if="!isLoading && contacts.length > 0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-300">
           <thead>
@@ -28,7 +34,7 @@
               <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                 Ime
               </th>
-              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Prezime</th>
+              <th class="py-3.5 text-left text-sm font-semibold text-gray-900">Prezime</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Email</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefon</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mobitel</th>
@@ -37,15 +43,13 @@
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Napomena</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Partneri</th>
               <th class="py-3.5 pl-3 pr-4 sm:pr-6">
-                <span class="sr-only">Uredi</span>
+                <span class="sr-only">Uredi / Izbriši</span>
               </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-for="contact in contacts" :key="contact.id">
-              <td
-                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
-              >
+              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-900 sm:pl-6">
                 {{ contact.ime }}
               </td>
               <td class="whitespace-nowrap py-4 text-sm text-gray-900">
@@ -70,10 +74,11 @@
                 {{ contact.napomena }}
               </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                <!-- PartnerDropdown component binds to contact.parnteri -->
+                <!-- Read-only dropdown displaying contact.parnteri -->
                 <PartnerDropdown
                   v-model="contact.parnteri"
                   :availablePartners="availablePartners"
+                  :editable="false"
                 />
               </td>
               <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
@@ -84,11 +89,20 @@
                 >
                   Uredi<span class="sr-only">, {{ contact.ime }}</span>
                 </a>
+                <button
+                  @click.prevent="deleteContact(contact)"
+                  class="ml-2 text-red-600 hover:text-red-900"
+                >
+                  Izbriši
+                </button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+    </Card>
+    <Card v-if="!isLoading && contacts.length === 0" class="text-center p-4">
+      Nema kontakata.
     </Card>
 
     <!-- Modal for Adding/Editing Contact -->
@@ -106,7 +120,7 @@
           </h3>
           <form @submit.prevent="submitContact">
             <div class="mb-4">
-              <label for="ime" class="block text-sm font-medium text-gray-700">Ime</label>
+              <label for="ime" class="block text-sm font-medium text-gray-700"> Ime </label>
               <input
                 type="text"
                 id="ime"
@@ -117,7 +131,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="prezime" class="block text-sm font-medium text-gray-700">Prezime</label>
+              <label for="prezime" class="block text-sm font-medium text-gray-700"> Prezime </label>
               <input
                 type="text"
                 id="prezime"
@@ -128,7 +142,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <label for="email" class="block text-sm font-medium text-gray-700"> Email </label>
               <input
                 type="email"
                 id="email"
@@ -138,7 +152,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="telefon" class="block text-sm font-medium text-gray-700">Telefon</label>
+              <label for="telefon" class="block text-sm font-medium text-gray-700"> Telefon </label>
               <input
                 type="text"
                 id="telefon"
@@ -148,7 +162,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="mobitel" class="block text-sm font-medium text-gray-700">Mobitel</label>
+              <label for="mobitel" class="block text-sm font-medium text-gray-700"> Mobitel </label>
               <input
                 type="text"
                 id="mobitel"
@@ -158,7 +172,9 @@
               />
             </div>
             <div class="mb-4">
-              <label for="pozicija" class="block text-sm font-medium text-gray-700">Pozicija</label>
+              <label for="pozicija" class="block text-sm font-medium text-gray-700">
+                Pozicija
+              </label>
               <input
                 type="text"
                 id="pozicija"
@@ -174,10 +190,12 @@
                 v-model="newContact.jeAktivan"
                 class="h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
               />
-              <label for="aktivan" class="ml-2 block text-sm text-gray-700">Aktivan</label>
+              <label for="aktivan" class="ml-2 block text-sm text-gray-700"> Aktivan </label>
             </div>
             <div class="mb-4">
-              <label for="napomena" class="block text-sm font-medium text-gray-700">Napomena</label>
+              <label for="napomena" class="block text-sm font-medium text-gray-700">
+                Napomena
+              </label>
               <textarea
                 id="napomena"
                 placeholder="Unesite napomenu"
@@ -187,10 +205,12 @@
               ></textarea>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700">Partneri</label>
+              <label class="block text-sm font-medium text-gray-700"> Partneri </label>
+              <!-- Editable dropdown in modal -->
               <PartnerDropdown
                 v-model="newContact.parnteri"
                 :availablePartners="availablePartners"
+                :editable="true"
               />
             </div>
             <div class="flex justify-end mt-4">
@@ -204,8 +224,10 @@
               <button
                 type="submit"
                 class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                :disabled="isSubmitting"
               >
-                Spremi
+                <span v-if="isSubmitting">Spremanje...</span>
+                <span v-else>Spremi</span>
               </button>
             </div>
           </form>
@@ -217,10 +239,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../api/axiosInstance.ts'
-import { jwtDecode } from 'jwt-decode'
+import api from '../api/axiosInstance'
 import Card from '@/components/CardComponent.vue'
 import PartnerDropdown from '@/components/PartnerDropdown.vue'
+import { jwtDecode } from 'jwt-decode'
+
+interface IPartnerData {
+  nazivPartnera: string
+  vatBroj: string
+}
 
 interface Contact {
   id: number
@@ -232,20 +259,23 @@ interface Contact {
   pozicija: string
   jeAktivan: boolean
   napomena: string
-  parnteri: string[]
+  parnteri: IPartnerData[]
+  KontaktPartneri?: { partner: IPartnerData }[]
 }
 
 interface IJwtPayload {
   nameid?: string
   sub?: string
-  // add other claims if needed
 }
 
 const contacts = ref<Contact[]>([])
-const availablePartners = ref<string[]>([])
+const availablePartners = ref<IPartnerData[]>([])
 
 const showContactModal = ref(false)
 const isEditing = ref(false)
+const isLoading = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 const newContact = ref<Contact>({
   id: 0,
@@ -260,24 +290,38 @@ const newContact = ref<Contact>({
   parnteri: [],
 })
 
-// Load contacts from the backend
+// Load contacts and flatten KontaktPartneri into parnteri.
 async function loadContacts() {
+  isLoading.value = true
+  errorMessage.value = ''
   try {
     const response = await api.get('/api/contact')
-    contacts.value = response.data
-  } catch (error) {
+    contacts.value = response.data.map((contact: Contact) => {
+      contact.parnteri =
+        (contact.KontaktPartneri || []).map((kp: { partner: IPartnerData }) => kp.partner) || []
+      return contact
+    })
+  } catch (error: unknown) {
     console.error('Failed to load contacts:', error)
+    errorMessage.value = 'Neuspješno učitavanje kontakata.'
+  } finally {
+    isLoading.value = false
   }
 }
 
-// Load available partners from the backend
+// Load available partners from the backend.
 async function loadAvailablePartners() {
   try {
-    const response = await api.get('/api/contact')
-    // Map the partners to an array of partner names (or VAT numbers as needed)
-    availablePartners.value = response.data.map((p: { nazivPartnera: string }) => p.nazivPartnera)
-  } catch (error) {
+    const response = await api.get('/api/partner')
+    availablePartners.value = response.data.map(
+      (p: { nazivPartnera: string; vatBroj: string }) => ({
+        nazivPartnera: p.nazivPartnera,
+        vatBroj: p.vatBroj,
+      }),
+    )
+  } catch (error: unknown) {
     console.error('Failed to load available partners:', error)
+    errorMessage.value = 'Neuspješno učitavanje partnera.'
   }
 }
 
@@ -288,7 +332,7 @@ function openAddContactModal() {
 }
 
 function openEditContactModal(contact: Contact) {
-  newContact.value = { ...contact }
+  newContact.value = JSON.parse(JSON.stringify(contact))
   isEditing.value = true
   showContactModal.value = true
 }
@@ -320,10 +364,8 @@ function getUserIdFromToken(): number | null {
   }
   try {
     const decoded = jwtDecode(token) as IJwtPayload
-    // Prefer "nameid" if available; otherwise, use "sub"
     const userIdStr = decoded.nameid || decoded.sub
-    const userId = userIdStr ? parseInt(userIdStr, 10) : null
-    return userId
+    return userIdStr ? parseInt(userIdStr, 10) : null
   } catch (error) {
     console.error('Failed to decode token:', error)
     return null
@@ -333,7 +375,13 @@ function getUserIdFromToken(): number | null {
 const userId = getUserIdFromToken()
 
 async function submitContact() {
-  // Prepare the payload. We use the first partner (if any) as the partner to associate with.
+  if (newContact.value.parnteri.length === 0) {
+    alert('Molimo odaberite barem jednog partnera.')
+    return
+  }
+
+  isSubmitting.value = true
+  errorMessage.value = ''
   const payload = {
     ime: newContact.value.ime,
     prezime: newContact.value.prezime,
@@ -343,22 +391,35 @@ async function submitContact() {
     pozicija: newContact.value.pozicija,
     jeAktivan: newContact.value.jeAktivan,
     napomena: newContact.value.napomena,
-    CreatedById: userId, // Replace with the actual logged-in employee's ID as needed
-    VATBrojPartnera: newContact.value.parnteri.length > 0 ? newContact.value.parnteri[0] : '',
+    CreatedById: userId,
+    VATBrojeviPartnera: newContact.value.parnteri.map((p) => p.vatBroj),
   }
 
   try {
     if (isEditing.value) {
-      // Update existing contact via PUT
       await api.put(`/api/contact/${newContact.value.id}`, payload)
     } else {
-      // Create new contact via POST
       await api.post('/api/contact', payload)
     }
     await loadContacts()
     closeContactModal()
   } catch (error) {
     console.error('Failed to submit contact:', error)
+    errorMessage.value = 'Neuspješno spremanje kontakta.'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+async function deleteContact(contact: Contact) {
+  if (confirm(`Jeste li sigurni da želite izbrisati kontakt: ${contact.ime} ${contact.prezime}?`)) {
+    try {
+      await api.delete(`/api/contact/${contact.id}`)
+      await loadContacts()
+    } catch (error) {
+      console.error('Failed to delete contact:', error)
+      errorMessage.value = 'Neuspješno brisanje kontakta.'
+    }
   }
 }
 
@@ -369,31 +430,25 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Firefox scrollbar styling */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #101828 transparent;
 }
-
-/* WebKit browsers (Chrome, Safari, Edge) */
 .custom-scrollbar::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
   border-radius: 12px;
   margin-bottom: 8px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background-color: #6a7282;
   border-radius: 12px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #101828;
   transition: all 0.3s ease-in-out;

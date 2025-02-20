@@ -1,91 +1,72 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-3xl font-bold text-gray-900 mb-4">Upravljanje djelatnicima</h2>
-    <router-link
-      to="/postavke"
-      class="btn btn-secondary mr-2 flex items-center gap-2 text-gray-900 hover:text-black transition-all duration-300 ease-in-out"
-    >
-      Vrati se na odabir postavki
-    </router-link>
-    <div>
-      <Card>
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Djelatnici</h2>
-        <ul class="grid gap-6 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
-          <li
-            v-for="employee in employees"
-            :key="employee.id"
-            class="bg-white shadow rounded-lg p-6"
-          >
-            <!-- Header: Employee image and basic info -->
-            <div class="flex items-center space-x-4">
-              <div class="flex justify-between w-full gap-6">
-                <h3 class="text-xl font-semibold text-gray-900">
-                  {{ employee.ime }} {{ employee.prezime }}
-                </h3>
-                <p class="flex items-center text-sm text-gray-500 mt-1">
-                  <BriefcaseIcon class="h-5 w-5 mr-2" />
-                  <span>{{ employee.pozicija }}</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Details: Using a two-column grid for info -->
-            <div class="mt-8 md:grid flex flex-col md:grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="flex items-center text-gray-600">
-                <MailIcon class="h-5 w-5 mr-2" />
-                <span class="text-sm min-w-0 truncate" :title="employee.email">
-                  {{ employee.email }}
-                </span>
-              </div>
-              <div class="flex items-center text-gray-600">
-                <PhoneIcon class="h-5 w-5 mr-2" />
-                <span class="text-sm min-w-0 truncate" :title="employee.telefon">
-                  {{ employee.telefon }}
-                </span>
-              </div>
-              <div class="flex items-center text-gray-600">
-                <DeviceMobileIcon class="h-5 w-5 mr-2" />
-                <span class="text-sm min-w-0 truncate" :title="employee.mobitel">
-                  {{ employee.mobitel }}
-                </span>
-              </div>
-              <div class="flex items-center text-gray-600">
-                <span v-if="employee.jeAktivan" class="flex items-center">
-                  <CheckCircleIcon class="h-5 w-5 mr-2 text-green-500" />
-                  <span class="text-sm">Aktivan</span>
-                </span>
-                <span v-else class="flex items-center">
-                  <XCircleIcon class="h-5 w-5 mr-2 text-red-500" />
-                  <span class="text-sm">Neaktivan</span>
-                </span>
-              </div>
-              <div class="flex items-center text-gray-600 col-span-2" v-if="employee.napomena">
-                <AnnotationIcon class="h-5 w-5 mr-2" />
-                <span class="text-sm min-w-0 break-words" :title="employee.napomena">
-                  {{ employee.napomena }}
-                </span>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </Card>
+    <!-- Loading and Error Messages -->
+    <div v-if="isLoading" class="text-center py-4 text-gray-600">Učitavam djelatnike...</div>
+    <div v-if="errorMessage" class="text-center py-4 text-red-600">
+      {{ errorMessage }}
     </div>
+
+    <!-- Employees Table (displayed only when not loading and data exists) -->
+    <Card v-if="!isLoading && employees.length > 0">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-300">
+          <thead>
+            <tr>
+              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                Ime
+              </th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Prezime</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">E-mail</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Telefon</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Mobitel</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Pozicija</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Aktivan</th>
+              <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Napomena</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="employee in employees" :key="employee.id">
+              <td
+                class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"
+              >
+                {{ employee.ime }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900">
+                {{ employee.prezime }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.email }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.telefon }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.mobitel }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.pozicija }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.jeAktivan ? 'Da' : 'Ne' }}
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ employee.napomena }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
+    <Card v-if="!isLoading && employees.length === 0" class="text-center p-4">
+      Nema djelatnika.
+    </Card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import api from '../api/axiosInstance.ts'
+import api from '@/api/axiosInstance'
 import Card from '@/components/CardComponent.vue'
-import {
-  MailIcon,
-  BriefcaseIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  AnnotationIcon,
-  DeviceMobileIcon,
-  PhoneIcon,
-} from '@heroicons/vue/outline'
 
 interface Employee {
   id: number
@@ -96,18 +77,25 @@ interface Employee {
   mobitel: string
   pozicija: string
   jeAktivan: boolean
-  napomena?: string
+  napomena: string
 }
 
 const employees = ref<Employee[]>([])
+const isLoading = ref(false)
+const errorMessage = ref('')
 
-// Load all employees from the backend
+// Function to load employees from the backend
 async function loadEmployees() {
+  isLoading.value = true
+  errorMessage.value = ''
   try {
-    const response = await api.get(`/api/employee`)
+    const response = await api.get('/api/employee')
     employees.value = response.data
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to load employees:', error)
+    errorMessage.value = 'Neuspješno učitavanje djelatnika. Molimo pokušajte ponovo.'
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -115,3 +103,35 @@ onMounted(() => {
   loadEmployees()
 })
 </script>
+
+<style scoped>
+/* Firefox scrollbar styling */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #101828 transparent;
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #6a7282;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #101828;
+  transition: all 0.3s ease-in-out;
+}
+</style>

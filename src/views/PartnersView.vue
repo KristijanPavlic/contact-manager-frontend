@@ -1,7 +1,13 @@
 <template>
   <div class="space-y-6">
-    <!-- Header -->
-    <div class="sm:flex sm:items-center">
+    <!-- Loading and Error Messages -->
+    <div v-if="isLoading" class="text-center py-4 text-gray-600">Učitavam partnere...</div>
+    <div v-if="errorMessage" class="text-center py-4 text-red-600">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Header (only shown when not loading) -->
+    <div v-if="!isLoading" class="sm:flex sm:items-center">
       <div class="sm:flex-auto">
         <h2 class="text-3xl font-bold text-gray-900">Partneri</h2>
         <p class="mt-2 text-sm text-gray-700">
@@ -12,15 +18,17 @@
         <button
           type="button"
           @click="openAddPartnerModal"
+          :disabled="isSubmitting"
           class="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:w-auto"
         >
-          Dodaj partnera
+          <span v-if="isSubmitting">Spremanje...</span>
+          <span v-else>Dodaj partnera</span>
         </button>
       </div>
     </div>
 
     <!-- Partners Table -->
-    <Card>
+    <Card v-if="!isLoading && partners.length > 0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-300">
           <thead>
@@ -39,7 +47,7 @@
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Dobavljač</th>
               <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Napomena</th>
               <th class="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                <span class="sr-only">Uredi</span>
+                <span class="sr-only">Uredi / Izbriši</span>
               </th>
             </tr>
           </thead>
@@ -56,7 +64,9 @@
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.postanskiBroj }}
               </td>
-              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{{ partner.grad }}</td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                {{ partner.grad }}
+              </td>
               <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                 {{ partner.drzava }}
               </td>
@@ -82,6 +92,7 @@
                 </a>
                 <button
                   @click.prevent="deletePartner(partner)"
+                  :disabled="isSubmitting"
                   class="ml-2 text-red-600 hover:text-red-900"
                 >
                   Izbriši
@@ -92,6 +103,7 @@
         </table>
       </div>
     </Card>
+    <Card v-if="!isLoading && partners.length === 0" class="text-center p-4"> Nema partnera. </Card>
 
     <!-- Modal for Adding/Editing Partner -->
     <teleport to="body">
@@ -108,9 +120,9 @@
           </h3>
           <form @submit.prevent="submitPartner">
             <div class="mb-4">
-              <label for="nazivPartnera" class="block text-sm font-medium text-gray-700"
-                >Naziv partnera</label
-              >
+              <label for="nazivPartnera" class="block text-sm font-medium text-gray-700">
+                Naziv partnera
+              </label>
               <input
                 type="text"
                 id="nazivPartnera"
@@ -121,7 +133,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="adresa" class="block text-sm font-medium text-gray-700">Adresa</label>
+              <label for="adresa" class="block text-sm font-medium text-gray-700"> Adresa </label>
               <input
                 type="text"
                 id="adresa"
@@ -132,9 +144,9 @@
               />
             </div>
             <div class="mb-4">
-              <label for="postanskiBroj" class="block text-sm font-medium text-gray-700"
-                >Poštanski broj</label
-              >
+              <label for="postanskiBroj" class="block text-sm font-medium text-gray-700">
+                Poštanski broj
+              </label>
               <input
                 type="text"
                 id="postanskiBroj"
@@ -145,7 +157,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="grad" class="block text-sm font-medium text-gray-700">Grad</label>
+              <label for="grad" class="block text-sm font-medium text-gray-700"> Grad </label>
               <input
                 type="text"
                 id="grad"
@@ -156,7 +168,7 @@
               />
             </div>
             <div class="mb-4">
-              <label for="drzava" class="block text-sm font-medium text-gray-700">Država</label>
+              <label for="drzava" class="block text-sm font-medium text-gray-700"> Država </label>
               <input
                 type="text"
                 id="drzava"
@@ -167,7 +179,9 @@
               />
             </div>
             <div class="mb-4">
-              <label for="vatBroj" class="block text-sm font-medium text-gray-700">VAT broj</label>
+              <label for="vatBroj" class="block text-sm font-medium text-gray-700">
+                VAT broj
+              </label>
               <input
                 type="text"
                 id="vatBroj"
@@ -202,7 +216,9 @@
               </div>
             </div>
             <div class="mb-4">
-              <label for="napomena" class="block text-sm font-medium text-gray-700">Napomena</label>
+              <label for="napomena" class="block text-sm font-medium text-gray-700">
+                Napomena
+              </label>
               <textarea
                 id="napomena"
                 placeholder="Unesite napomenu"
@@ -222,8 +238,10 @@
               <button
                 type="submit"
                 class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                :disabled="isSubmitting"
               >
-                Spremi
+                <span v-if="isSubmitting">Spremanje...</span>
+                <span v-else>Spremi</span>
               </button>
             </div>
           </form>
@@ -250,6 +268,7 @@ interface IPartner {
   jeKupac: boolean
   jeDobavaljac: boolean
   napomena: string
+  tipPartnera?: string
 }
 
 interface IJwtPayload {
@@ -261,8 +280,11 @@ const partners = ref<IPartner[]>([])
 
 const showPartnerModal = ref(false)
 const isEditing = ref(false)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const isLoading = ref(false)
 
-const newPartner = ref({
+const newPartner = ref<IPartner>({
   id: 0,
   nazivPartnera: '',
   adresa: '',
@@ -270,14 +292,19 @@ const newPartner = ref({
   grad: '',
   drzava: '',
   vatBroj: '',
-  tipPartnera: '',
+  jeKupac: false,
+  jeDobavaljac: false,
   napomena: '',
+  tipPartnera: '',
 })
 
 // Extract user ID from token
 function getUserIdFromToken(): number | null {
   const token = localStorage.getItem('token')
-  if (!token) return null
+  if (!token) {
+    console.error('Token not found in localStorage')
+    return null
+  }
   try {
     const decoded = jwtDecode(token) as IJwtPayload
     const userIdStr = decoded.nameid || decoded.sub
@@ -289,13 +316,17 @@ function getUserIdFromToken(): number | null {
 }
 
 const userId = getUserIdFromToken()
-
 async function loadPartners() {
+  errorMessage.value = ''
   try {
+    isLoading.value = true
     const response = await api.get('/api/partner')
     partners.value = response.data
   } catch (error) {
     console.error('Failed to load partners:', error)
+    errorMessage.value = 'Neuspješno učitavanje partnera.'
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -306,17 +337,7 @@ function openAddPartnerModal() {
 }
 
 function openEditPartnerModal(partner: IPartner) {
-  newPartner.value = {
-    id: partner.id,
-    nazivPartnera: partner.nazivPartnera,
-    adresa: partner.adresa,
-    postanskiBroj: partner.postanskiBroj,
-    grad: partner.grad,
-    drzava: partner.drzava,
-    vatBroj: partner.vatBroj,
-    tipPartnera: partner.jeKupac ? 'kupac' : 'dobavaljac',
-    napomena: partner.napomena,
-  }
+  newPartner.value = { ...partner }
   isEditing.value = true
   showPartnerModal.value = true
 }
@@ -334,8 +355,10 @@ function resetNewPartner() {
     grad: '',
     drzava: '',
     vatBroj: '',
-    tipPartnera: '',
+    jeKupac: false,
+    jeDobavaljac: false,
     napomena: '',
+    tipPartnera: '',
   }
 }
 
@@ -345,9 +368,10 @@ async function submitPartner() {
     return
   }
 
-  // Build payload including partner id for updates.
+  isSubmitting.value = true
+  errorMessage.value = ''
   const partnerPayload = {
-    id: newPartner.value.id, // required for update
+    id: newPartner.value.id,
     nazivPartnera: newPartner.value.nazivPartnera,
     adresa: newPartner.value.adresa,
     postanskiBroj: newPartner.value.postanskiBroj,
@@ -357,7 +381,7 @@ async function submitPartner() {
     jeKupac: newPartner.value.tipPartnera === 'kupac',
     jeDobavaljac: newPartner.value.tipPartnera === 'dobavaljac',
     napomena: newPartner.value.napomena,
-    CreatedById: userId, // dynamically set from token
+    CreatedById: userId,
   }
 
   try {
@@ -370,6 +394,9 @@ async function submitPartner() {
     closePartnerModal()
   } catch (error) {
     console.error('Failed to submit partner:', error)
+    errorMessage.value = 'Neuspješno spremanje partnera.'
+  } finally {
+    isSubmitting.value = false
   }
 }
 
@@ -380,6 +407,7 @@ async function deletePartner(partner: IPartner) {
       await loadPartners()
     } catch (error) {
       console.error('Failed to delete partner:', error)
+      errorMessage.value = 'Neuspješno brisanje partnera.'
     }
   }
 }

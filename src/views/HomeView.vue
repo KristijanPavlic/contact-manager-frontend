@@ -1,11 +1,15 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
-    <!-- Dashboard Stats Cards -->
-    <div class="grid gap-6 grid-cols-2 lg:grid-cols-4">
+    <!-- Loading and Error Messages -->
+    <div v-if="isLoading" class="text-center py-4 text-gray-600">Učitavam podatke...</div>
+    <div v-if="errorMessage" class="text-center py-4 text-red-600">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Dashboard Stats Cards (displayed when not loading) -->
+    <div v-if="!isLoading" class="grid gap-6 grid-cols-2 lg:grid-cols-4">
       <Card v-for="stat in stats" :key="stat.ime">
         <dt class="text-sm font-medium text-gray-500 truncate">
-          <!-- If the stat name includes "Svi", make it a link -->
           <template v-if="stat.ime.includes('Svi')">
             <router-link :to="stat.ime.slice(4).toLocaleLowerCase()">
               {{ stat.ime }}
@@ -22,7 +26,7 @@
     </div>
 
     <!-- Logged-in Employee's Recent Contacts and Partners -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div v-if="!isLoading" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <Card class="max-h-96 overflow-y-auto custom-scrollbar">
         <h2 class="text-lg font-medium text-gray-900 mb-4">
           10 zadnje dodanih kontakata prijavljenog djelatnika
@@ -64,7 +68,7 @@
     </div>
 
     <!-- Overall Recent Contacts and Partners -->
-    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div v-if="!isLoading" class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <Card class="max-h-96 overflow-y-auto custom-scrollbar">
         <h2 class="text-lg font-medium text-gray-900 mb-4">10 zadnje dodanih kontakata ukupno</h2>
         <ul class="divide-y divide-gray-200">
@@ -108,7 +112,7 @@ import { ref, onMounted } from 'vue'
 import api from '@/api/axiosInstance'
 import Card from '@/components/CardComponent.vue'
 
-// Define interfaces for the data structures
+// Define interfaces for dashboard data
 interface IStat {
   ime: string
   value: string
@@ -119,7 +123,7 @@ interface IContact {
   ime: string
   prezime: string
   email: string
-  // You can add additional fields as needed (e.g., telefon, mobitel, etc.)
+  // Add additional fields as needed
 }
 
 interface IPartner {
@@ -130,39 +134,40 @@ interface IPartner {
   drzava: string
 }
 
-// Replace "any" with the specific interfaces
+// Reactive state variables
 const stats = ref<IStat[]>([])
 const myRecentContacts = ref<IContact[]>([])
 const myRecentPartners = ref<IPartner[]>([])
 const recentContacts = ref<IContact[]>([])
 const recentPartners = ref<IPartner[]>([])
 
+const isLoading = ref(false)
+const errorMessage = ref('')
+
 // Function to load dashboard data from the backend
 async function loadDashboardData() {
+  isLoading.value = true
+  errorMessage.value = ''
   try {
-    // If your API requires JWT authentication, get the token and include it in the headers:
-    // const token = localStorage.getItem('jwtToken')
-    // const config = { headers: { Authorization: `Bearer ${token}` } }
-
-    // Call the dashboard endpoint; adjust the URL if needed.
     const response = await api.get('/api/dashboard')
     const data = response.data
 
-    // Set the reactive variables with the data from the backend
     myRecentContacts.value = data.myKontakti || []
     myRecentPartners.value = data.myPartneri || []
     recentContacts.value = data.allKontakti || []
     recentPartners.value = data.allPartneri || []
 
-    // Optionally, update stats (if backend returns totals)
     stats.value = [
       { ime: 'Svi kontakti', value: data.totalKontakti || '0' },
       { ime: 'Svi Partneri', value: data.totalPartneri || '0' },
       { ime: 'Aktivni kontakti', value: data.aktivniKontakti || '0' },
       { ime: 'Aktivni Partneri', value: data.aktivniPartneri || '0' },
     ]
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to load dashboard data:', error)
+    errorMessage.value = 'Neuspješno učitavanje podataka. Molimo pokušajte ponovo.'
+  } finally {
+    isLoading.value = false
   }
 }
 

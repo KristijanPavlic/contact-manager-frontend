@@ -1,6 +1,8 @@
 <template>
   <div ref="container" class="relative inline-block text-left">
+    <!-- If editable is true, show the dropdown button -->
     <button
+      v-if="editable"
       @click="toggleDropdown"
       type="button"
       class="inline-flex items-center justify-between w-48 rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none"
@@ -22,20 +24,31 @@
         />
       </svg>
     </button>
+    <!-- If not editable, simply display the selected partners -->
     <div
-      v-if="open"
+      v-else
+      class="w-48 border border-gray-300 rounded-md px-4 py-2 bg-white text-sm text-gray-700"
+    >
+      <span v-if="modelValue.length === 0">Nema partnera</span>
+      <span v-else>
+        {{ modelValue.map((p) => p.nazivPartnera).join(', ') }}
+      </span>
+    </div>
+    <!-- Dropdown menu (only shown when editable and open) -->
+    <div
+      v-if="editable && open"
       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
     >
       <div class="py-1">
-        <template v-for="partner in availablePartners" :key="partner">
+        <template v-for="partner in availablePartners" :key="partner.vatBroj">
           <label class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
             <input
               type="checkbox"
               class="mr-2"
-              :checked="modelValue.includes(partner)"
+              :checked="isSelected(partner)"
               @change="() => selectPartner(partner)"
             />
-            <span>{{ partner }}</span>
+            <span>{{ partner.nazivPartnera }}</span>
           </label>
         </template>
       </div>
@@ -46,30 +59,42 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
+interface IPartnerData {
+  nazivPartnera: string
+  vatBroj: string
+}
+
 interface Props {
-  modelValue: string[]
-  availablePartners: string[]
+  modelValue: IPartnerData[]
+  availablePartners: IPartnerData[]
+  editable?: boolean
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string[]): void
+  (e: 'update:modelValue', value: IPartnerData[]): void
 }>()
 
 const open = ref(false)
 const container = ref<HTMLElement | null>(null)
 
 function toggleDropdown() {
-  open.value = !open.value
+  if (props.editable) {
+    open.value = !open.value
+  }
 }
 
-function selectPartner(partner: string) {
-  const newValue = [...props.modelValue]
-  const index = newValue.indexOf(partner)
-  if (index === -1) {
-    newValue.push(partner)
+function isSelected(partner: IPartnerData): boolean {
+  return props.modelValue.some((p) => p.vatBroj === partner.vatBroj)
+}
+
+function selectPartner(partner: IPartnerData) {
+  if (!props.editable) return
+  let newValue = [...props.modelValue]
+  if (isSelected(partner)) {
+    newValue = newValue.filter((p) => p.vatBroj !== partner.vatBroj)
   } else {
-    newValue.splice(index, 1)
+    newValue.push(partner)
   }
   emit('update:modelValue', newValue)
 }
@@ -94,3 +119,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style scoped>
+/* Additional styles if needed */
+</style>
