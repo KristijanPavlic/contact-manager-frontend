@@ -1,6 +1,7 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-8 text-gray-800">Employee Directory</h1>
+  <div class="container mx-auto px-4 py-6">
+    <h2 class="text-3xl font-bold text-gray-900 mb-4">Upravljanje djelatnicima</h2>
+    <RouterLink to="/postavke" class="btn btn-secondary">Vrati se na odabir postavki</RouterLink>
 
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-12"></div>
@@ -15,7 +16,7 @@
       <div
         v-for="employee in employees"
         :key="employee.id"
-        class="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out hover:shadow-lg"
+        class="bg-white rounded-lg shadow-md overflow-hidden mt-6 transition duration-300 ease-in-out hover:shadow-lg"
       >
         <div class="p-6 flex flex-col space-y-4">
           <!-- Top Section: Picture and Basic Info -->
@@ -37,43 +38,46 @@
           <div class="border-t border-gray-200"></div>
 
           <!-- Details Section -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="flex items-center text-gray-700">
-              <div>
-                <h4 class="text-sm font-medium text-gray-900">Email:</h4>
-                <p class="text-sm text-gray-600 mt-1">{{ employee.email }}</p>
+          <div class="flex md:flex-row flex-col justify-between gap-4 w-5/6">
+            <div class="flex-1 space-y-4">
+              <div class="flex items-center text-gray-700">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900">Email:</h4>
+                  <p class="text-sm text-gray-600 mt-1">{{ employee.email }}</p>
+                </div>
+              </div>
+              <div class="flex items-center text-gray-700">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900">Mobitel:</h4>
+                  <p class="text-sm text-gray-600 mt-1">{{ employee.mobitel }}</p>
+                </div>
+              </div>
+              <div v-if="employee.napomena" class="mt-2">
+                <div class="flex items-start">
+                  <div>
+                    <h4 class="text-sm font-medium text-gray-900">Napomena:</h4>
+                    <p class="text-sm text-gray-600 mt-1">{{ employee.napomena }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="flex items-center text-gray-700">
-              <div>
-                <h4 class="text-sm font-medium text-gray-900">Telefon:</h4>
-                <p class="text-sm text-gray-600 mt-1">{{ employee.telefon }}</p>
+            <div class="flex flex-col space-y-4">
+              <div class="flex items-center text-gray-700">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900">Telefon:</h4>
+                  <p class="text-sm text-gray-600 mt-1">{{ employee.telefon }}</p>
+                </div>
               </div>
-            </div>
-            <div class="flex items-center text-gray-700">
-              <div>
-                <h4 class="text-sm font-medium text-gray-900">Mobitel:</h4>
-                <p class="text-sm text-gray-600 mt-1">{{ employee.mobitel }}</p>
-              </div>
-            </div>
-            <div class="flex items-center text-gray-700">
-              <span
-                :class="[
-                  'px-2 py-1 rounded-full text-xs font-medium',
-                  employee.jeAktivan ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
-                ]"
-              >
-                {{ employee.jeAktivan ? 'Aktivan' : 'Neaktivan' }}
-              </span>
-            </div>
-          </div>
 
-          <!-- Note Section -->
-          <div v-if="employee.napomena" class="mt-2">
-            <div class="flex items-start">
-              <div>
-                <h4 class="text-sm font-medium text-gray-900">Napomena:</h4>
-                <p class="text-sm text-gray-600 mt-1">{{ employee.napomena }}</p>
+              <div class="flex items-center text-gray-700">
+                <span
+                  :class="[
+                    'px-2 py-1 rounded-full text-xs font-medium',
+                    employee.jeAktivan ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                  ]"
+                >
+                  {{ employee.jeAktivan ? 'Aktivan' : 'Neaktivan' }}
+                </span>
               </div>
             </div>
           </div>
