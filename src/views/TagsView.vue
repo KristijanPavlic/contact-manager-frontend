@@ -1,102 +1,109 @@
 <template>
-  <div class="space-y-6">
-    <h2 class="text-3xl font-bold text-gray-900 mb-4">Upravljanje tagovima</h2>
-    <RouterLink to="/postavke" class="btn btn-secondary">Vrati se na odabir postavki</RouterLink>
-    <div>
-      <Card>
-        <h2 class="text-lg font-medium text-gray-900 mb-4">Tagovi</h2>
-        <div v-if="isLoading" class="text-center py-4">
-          <span class="text-gray-600">Učitavanje tagova...</span>
-        </div>
-        <div v-else-if="error" class="text-center py-4">
-          <span class="text-red-600">{{ error }}</span>
-        </div>
-        <transition-group v-else name="fade" tag="div" class="flex flex-wrap gap-4 overflow-x-auto">
-          <div
-            v-for="tag in tags"
-            :key="`tag-${tag.id}`"
-            class="group flex items-center px-3 py-1 rounded-full md:text-md text-sm font-medium bg-green-100 text-green-800"
+  <LoadingErrorWrapper :loading="isLoading" :errorMessage="error" loadingText="Učitavam tagove...">
+    <div class="space-y-6">
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">Upravljanje tagovima</h2>
+      <RouterLink to="/postavke" class="btn btn-secondary">Vrati se na odabir postavki</RouterLink>
+      <div>
+        <Card>
+          <h2 class="text-lg font-medium text-gray-900 mb-4">Tagovi</h2>
+          <!-- If there are no tags, display the message -->
+          <div v-if="!isLoading && tags.length === 0" class="text-center py-4 text-gray-600">
+            Ne postoji niti jedan tag
+          </div>
+          <!-- Otherwise, display the list of tags -->
+          <transition-group
+            name="fade"
+            tag="div"
+            class="flex flex-wrap gap-4 overflow-x-auto"
+            v-else
           >
-            <template v-if="editingTagId === tag.id">
+            <div
+              v-for="tag in tags"
+              :key="`tag-${tag.id}`"
+              class="group flex items-center px-3 py-1 rounded-full md:text-md text-sm font-medium bg-green-100 text-green-800"
+            >
+              <template v-if="editingTagId === tag.id">
+                <input
+                  type="text"
+                  v-model="editedTagName"
+                  maxlength="50"
+                  class="px-2 py-1 border border-gray-300 rounded"
+                  @keyup.enter="saveEdit(tag)"
+                  ref="editInput"
+                  @focus="($event.target as HTMLInputElement)?.select()"
+                />
+                <button
+                  type="button"
+                  @click="saveEdit(tag)"
+                  class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
+                  title="Spremi promjene"
+                  :disabled="isEditing"
+                >
+                  <span v-if="isEditing">...</span>
+                  <span v-else>&#10003;</span>
+                </button>
+                <button
+                  type="button"
+                  @click="cancelEdit"
+                  class="ml-2 text-lg transition-opacity duration-200 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  title="Otkaži"
+                  :disabled="isEditing"
+                >
+                  &#10005;
+                </button>
+              </template>
+              <template v-else>
+                <span>{{ tag.naziv }}</span>
+                <button
+                  type="button"
+                  @click="startEdit(tag)"
+                  class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
+                  title="Uredi tag"
+                >
+                  &#9998;
+                </button>
+                <button
+                  type="button"
+                  @click="deleteTag(tag)"
+                  class="ml-2 text-lg transition-opacity duration-200 text-red-500 hover:text-red-700 focus:outline-none"
+                  title="Izbriši tag"
+                  :disabled="isDeleting === tag.id"
+                >
+                  <span v-if="isDeleting === tag.id">...</span>
+                  <span v-else>&times;</span>
+                </button>
+              </template>
+            </div>
+          </transition-group>
+          <form @submit.prevent="addTag" class="mt-4">
+            <div class="flex rounded-md shadow-sm">
               <input
                 type="text"
-                v-model="editedTagName"
                 maxlength="50"
-                class="px-2 py-1 border border-gray-300 rounded"
-                @keyup.enter="saveEdit(tag)"
-                ref="editInput"
-                @focus="($event.target as HTMLInputElement)?.select()"
+                v-model.trim="newTag"
+                class="pl-2 flex-1 block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-l-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                placeholder="Novi tag"
               />
               <button
-                type="button"
-                @click="saveEdit(tag)"
-                class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
-                title="Spremi promjene"
-                :disabled="isEditing"
+                type="submit"
+                :disabled="!canAdd || isAdding"
+                class="-ml-px inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span v-if="isEditing">...</span>
-                <span v-else>&#10003;</span>
+                <span v-if="isAdding">Dodavanje...</span>
+                <span v-else>Dodaj tag</span>
               </button>
-              <button
-                type="button"
-                @click="cancelEdit"
-                class="ml-2 text-lg transition-opacity duration-200 text-gray-500 hover:text-gray-700 focus:outline-none"
-                title="Otkaži"
-                :disabled="isEditing"
-              >
-                &#10005;
-              </button>
-            </template>
-            <template v-else>
-              <span>{{ tag.naziv }}</span>
-              <button
-                type="button"
-                @click="startEdit(tag)"
-                class="ml-2 text-lg transition-opacity duration-200 text-blue-500 hover:text-blue-700 focus:outline-none"
-                title="Uredi tag"
-              >
-                &#9998;
-              </button>
-              <button
-                type="button"
-                @click="deleteTag(tag)"
-                class="ml-2 text-lg transition-opacity duration-200 text-red-500 hover:text-red-700 focus:outline-none"
-                title="Izbriši tag"
-                :disabled="isDeleting === tag.id"
-              >
-                <span v-if="isDeleting === tag.id">...</span>
-                <span v-else>&times;</span>
-              </button>
-            </template>
-          </div>
-        </transition-group>
-        <form @submit.prevent="addTag" class="mt-4">
-          <div class="flex rounded-md shadow-sm">
-            <input
-              type="text"
-              maxlength="50"
-              v-model.trim="newTag"
-              class="pl-2 flex-1 block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-l-md focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-              placeholder="Novi tag"
-            />
-            <button
-              type="submit"
-              :disabled="!canAdd || isAdding"
-              class="-ml-px inline-flex items-center space-x-2 px-4 py-2 border border-gray-300 text-sm font-medium rounded-r-md text-gray-700 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span v-if="isAdding">Dodavanje...</span>
-              <span v-else>Dodaj tag</span>
-            </button>
-          </div>
-        </form>
-      </Card>
+            </div>
+          </form>
+        </Card>
+      </div>
     </div>
-  </div>
+  </LoadingErrorWrapper>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, onMounted, nextTick } from 'vue'
-import api from '../api/axiosInstance.ts'
+import api from '../api/axiosInstance'
+import LoadingErrorWrapper from '@/components/LoadingErrorWrapper.vue'
 import Card from '@/components/CardComponent.vue'
 import { RouterLink } from 'vue-router'
 
@@ -180,18 +187,14 @@ const saveEdit = async (tag: Tag): Promise<void> => {
 
   isEditing.value = true
   try {
-    const response = await api.put(`/api/tag/${tag.id}`, {
+    await api.put(`/api/tag/${tag.id}`, {
       id: tag.id,
       naziv: newTagValue,
     })
 
-    // Find the index of the tag we're updating
+    // Update the tag in the list
     const tagIndex = tags.value.findIndex((t) => t.id === tag.id)
     if (tagIndex !== -1) {
-      // Create a new array with the updated tag
-      const updatedTags = [...tags.value]
-      updatedTags[tagIndex] = { ...response.data }
-      // tags.value = updatedTags
       tags.value[tagIndex] = { ...tags.value[tagIndex], naziv: newTagValue }
     }
 
