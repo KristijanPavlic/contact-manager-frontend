@@ -80,7 +80,7 @@
                     :editable="false"
                   />
                 </td>
-                <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                <td class="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm sm:pr-6">
                   <a
                     href="#"
                     @click.prevent="openEditContactModal(contact)"
@@ -216,6 +216,7 @@
                   v-model="newContact.parnteri"
                   :availablePartners="availablePartners"
                   :editable="true"
+                  class="mt-1"
                 />
               </div>
               <div class="flex justify-end mt-4">
@@ -253,7 +254,7 @@ import { jwtDecode } from 'jwt-decode'
 
 interface IPartnerData {
   nazivPartnera: string
-  vatBroj: string
+  VATBroj: string
 }
 
 interface Contact {
@@ -267,6 +268,7 @@ interface Contact {
   jeAktivan: boolean
   napomena: string
   parnteri: IPartnerData[]
+  // Original join data (if any)
   KontaktPartneri?: { partner: IPartnerData }[]
 }
 
@@ -297,15 +299,26 @@ const newContact = ref<Contact>({
   parnteri: [],
 })
 
-// Load contacts and flatten KontaktPartneri into parnteri.
+// Helper function to “normalize” a partner object so that it always has a defined 'vatBroj' string.
+function normalizePartner(p: { nazivPartnera: string; VATBroj?: string }): IPartnerData {
+  return {
+    nazivPartnera: p.nazivPartnera,
+    VATBroj: p.VATBroj || '',
+  }
+}
+
+// Load contacts. If a contact does not have a defined 'parnteri' array, then flatten it from its KontaktPartneri.
 async function loadContacts() {
   isLoading.value = true
   errorMessage.value = ''
   try {
     const response = await api.get('/api/contact')
     contacts.value = response.data.map((contact: Contact) => {
-      contact.parnteri =
-        (contact.KontaktPartneri || []).map((kp: { partner: IPartnerData }) => kp.partner) || []
+      if (!contact.parnteri || contact.parnteri.length === 0) {
+        contact.parnteri = (contact.KontaktPartneri || []).map((kp: { partner: IPartnerData }) =>
+          normalizePartner(kp.partner),
+        )
+      }
       return contact
     })
   } catch (error: unknown) {
@@ -316,19 +329,19 @@ async function loadContacts() {
   }
 }
 
-// Load available partners from the backend.
+// Load available partners and normalize them.
 async function loadAvailablePartners() {
   try {
     const response = await api.get('/api/partner')
     availablePartners.value = response.data.map(
-      (p: { nazivPartnera: string; vatBroj: string }) => ({
+      (p: { nazivPartnera: string; vatBroj?: string; VATBroj?: string }) => ({
         nazivPartnera: p.nazivPartnera,
-        vatBroj: p.vatBroj,
+        VATBroj: p.VATBroj || p.vatBroj, // use whichever is provided
       }),
     )
   } catch (error: unknown) {
-    console.error('Failed to load available contacts:', error)
-    errorMessage.value = 'Neuspješno učitavanje kontakata. Molimo pokušajte ponovo.'
+    console.error('Failed to load available partners:', error)
+    errorMessage.value = 'Neuspješno učitavanje partnera. Molimo pokušajte ponovo.'
   }
 }
 
@@ -339,7 +352,12 @@ function openAddContactModal() {
 }
 
 function openEditContactModal(contact: Contact) {
+  // Deep clone the contact (so changes do not immediately affect the list)
   newContact.value = JSON.parse(JSON.stringify(contact))
+  // Ensure the partner array is normalized with proper typing
+  newContact.value.parnteri = (newContact.value.parnteri || []).map(
+    (p: { nazivPartnera: string; vatBroj?: string; VATBroj?: string }) => normalizePartner(p),
+  )
   isEditing.value = true
   showContactModal.value = true
 }
@@ -382,13 +400,15 @@ function getUserIdFromToken(): number | null {
 const userId = getUserIdFromToken()
 
 async function submitContact() {
-  if (newContact.value.parnteri.length === 0) {
+  // When adding a new contact, enforce at least one partner.
+  if (!isEditing.value && newContact.value.parnteri.length === 0) {
     alert('Molimo odaberite barem jednog partnera.')
     return
   }
 
   isSubmitting.value = true
   errorMessage.value = ''
+
   const payload = {
     ime: newContact.value.ime,
     prezime: newContact.value.prezime,
@@ -399,8 +419,10 @@ async function submitContact() {
     jeAktivan: newContact.value.jeAktivan,
     napomena: newContact.value.napomena,
     CreatedById: userId,
-    VATBrojeviPartnera: newContact.value.parnteri.map((p) => p.vatBroj),
+    VATBrojeviPartnera: newContact.value.parnteri.map((p) => p.VATBroj),
   }
+
+  console.log('Submitting contact with payload:', payload)
 
   try {
     if (isEditing.value) {

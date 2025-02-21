@@ -40,7 +40,7 @@
       class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10"
     >
       <div class="py-1">
-        <template v-for="partner in availablePartners" :key="partner.vatBroj">
+        <template v-for="partner in availablePartners" :key="partner.VATBroj">
           <label class="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer">
             <input
               type="checkbox"
@@ -61,7 +61,7 @@ import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 
 interface IPartnerData {
   nazivPartnera: string
-  vatBroj: string
+  VATBroj: string
 }
 
 interface Props {
@@ -85,14 +85,14 @@ function toggleDropdown() {
 }
 
 function isSelected(partner: IPartnerData): boolean {
-  return props.modelValue.some((p) => p.vatBroj === partner.vatBroj)
+  return props.modelValue.some((p) => p.VATBroj === partner.VATBroj)
 }
 
 function selectPartner(partner: IPartnerData) {
   if (!props.editable) return
   let newValue = [...props.modelValue]
   if (isSelected(partner)) {
-    newValue = newValue.filter((p) => p.vatBroj !== partner.vatBroj)
+    newValue = newValue.filter((p) => p.VATBroj !== partner.VATBroj)
   } else {
     newValue.push(partner)
   }
