@@ -17,13 +17,13 @@
               <NavLink to="/" :exact="true">Početna</NavLink>
               <NavLink to="/partneri">Partneri</NavLink>
               <NavLink to="/kontakti">Kontakti</NavLink>
-              <!-- Settings dropdown for desktop (clickable) -->
+              <!-- Settings dropdown for desktop -->
               <div ref="desktopDropdownRef" class="relative inline-block">
                 <button
                   type="button"
                   @click.stop="toggleDesktopDropdown"
                   :class="[
-                    'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-semibold outline-none transition-all duration-300 ease-in-out focus:outline-none',
+                    'inline-flex items-center outline-none px-1 pt-1 border-b-2 text-sm font-semibold transition-all duration-300 ease-in-out focus:outline-none',
                     desktopDropdownOpen
                       ? 'border-green-500 text-black'
                       : 'border-transparent text-gray-600 hover:text-black hover:border-gray-400',
@@ -38,7 +38,6 @@
                     />
                   </svg>
                 </button>
-
                 <transition name="fade">
                   <div
                     v-if="desktopDropdownOpen"
@@ -65,10 +64,12 @@
           </div>
           <div class="hidden lg:ml-6 lg:flex lg:items-center">
             <button
-              @click="logout"
+              @click="handleLogout"
+              :disabled="isLoggingOut"
               class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out"
             >
-              Odjavi se
+              <span v-if="isLoggingOut">Odjava u tijeku...</span>
+              <span v-else>Odjavi se</span>
             </button>
           </div>
           <div class="flex items-center lg:hidden">
@@ -96,12 +97,10 @@
           </div>
         </div>
       </div>
-
       <!-- Mobile menu -->
       <div class="lg:hidden px-4" :class="{ block: isMobileMenuOpen, hidden: !isMobileMenuOpen }">
         <div class="pt-2 pb-3 space-y-2">
           <div v-for="link in navLinks" :key="link.text">
-            <!-- Standard mobile nav link -->
             <div v-if="!link.children">
               <router-link
                 :to="link.to"
@@ -116,7 +115,6 @@
                 {{ link.text }}
               </router-link>
             </div>
-            <!-- Mobile dropdown for links with children (e.g., Settings) -->
             <div v-else>
               <button
                 @click="toggleDropdown(link.text)"
@@ -184,6 +182,8 @@ const isMobileMenuOpen = ref(false)
 const openDropdown = ref<string | null>(null)
 const desktopDropdownOpen = ref(false)
 const desktopDropdownRef = ref<HTMLElement | null>(null)
+const isLoggingOut = ref(false)
+const logoutError = ref('')
 
 const navLinks = [
   { to: '/', text: 'Početna' },
@@ -191,7 +191,7 @@ const navLinks = [
   { to: '/kontakti', text: 'Kontakti' },
   {
     text: 'Postavke',
-    to: '/postavke', // fallback route if needed
+    to: '/postavke',
     children: [
       { to: '/postavke/djelatnici', text: 'Djelatnici' },
       { to: '/postavke/tagovi', text: 'Tagovi' },
@@ -233,14 +233,23 @@ onUnmounted(() => {
   document.removeEventListener('click', closeDesktopDropdown)
 })
 
-const logout = () => {
-  authStore.logout()
-  router.push('/login')
+const handleLogout = async () => {
+  isLoggingOut.value = true
+  logoutError.value = ''
+  try {
+    await authStore.logout()
+    router.push('/login')
+  } catch (error) {
+    console.error('Logout failed:', error)
+    logoutError.value = 'Neuspješna odjava. Molimo pokušajte ponovo.'
+  } finally {
+    isLoggingOut.value = false
+  }
 }
 
-const handleMobileLogout = () => {
+const handleMobileLogout = async () => {
   closeMobileMenu()
-  logout()
+  await handleLogout()
 }
 </script>
 

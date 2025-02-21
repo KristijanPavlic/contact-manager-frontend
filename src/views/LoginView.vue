@@ -10,6 +10,12 @@
           Prijavite se u svoj račun
         </h2>
       </div>
+
+      <!-- Display error message if login fails -->
+      <div v-if="errorMessage" class="text-red-500 text-center">
+        {{ errorMessage }}
+      </div>
+
       <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
         <input type="hidden" name="remember" value="true" />
         <div class="rounded-md shadow-sm -space-y-px flex flex-col gap-2">
@@ -44,9 +50,11 @@
         <div>
           <button
             type="submit"
+            :disabled="isSubmitting"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300 ease-in-out"
           >
-            Prijavi se
+            <span v-if="isSubmitting">Prijava u tijeku...</span>
+            <span v-else>Prijavi se</span>
           </button>
         </div>
       </form>
@@ -64,14 +72,20 @@ const router = useRouter()
 
 const email = ref('')
 const password = ref('')
+const isSubmitting = ref(false)
+const errorMessage = ref('')
 
 const handleSubmit = async () => {
+  isSubmitting.value = true
+  errorMessage.value = ''
   try {
     await auth.login(email.value, password.value)
     router.push('/')
   } catch (error) {
     console.error('Login failed:', error)
-    // TODO: Show error message to user
+    errorMessage.value = 'Neuspješna prijava. Provjerite unesene podatke i pokušajte ponovo.'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
